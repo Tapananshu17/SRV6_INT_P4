@@ -1,0 +1,1 @@
+p4c --arch v1model --p4runtime-files p4info.txt -DTARGET_BMV2 -DCPU_PORT=255 main.p4 

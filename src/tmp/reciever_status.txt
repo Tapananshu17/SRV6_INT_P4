@@ -1,0 +1,3 @@
+arguments parsed
+interface : h2-eth0
+socket ready

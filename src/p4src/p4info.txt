@@ -1,0 +1,418 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 43538908
+    name: "IngressPipeImpl.unicast"
+    alias: "unicast"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.dst_addr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 23654904
+  }
+  action_refs {
+    id: 28396054
+  }
+  action_refs {
+    id: 21257015
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 34858041
+    name: "IngressPipeImpl.routing_v6"
+    alias: "routing_v6"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv6.dst_addr"
+    bitwidth: 128
+    match_type: LPM
+  }
+  action_refs {
+    id: 23394961
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 47243253
+    name: "IngressPipeImpl.srv6_localsid_table"
+    alias: "srv6_localsid_table"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv6.dst_addr"
+    bitwidth: 128
+    match_type: LPM
+  }
+  action_refs {
+    id: 22238276
+  }
+  action_refs {
+    id: 24031843
+  }
+  action_refs {
+    id: 29883710
+  }
+  action_refs {
+    id: 30328617
+  }
+  action_refs {
+    id: 24384261
+  }
+  action_refs {
+    id: 21257015
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 36193732
+    name: "IngressPipeImpl.xconnect_table"
+    alias: "xconnect_table"
+  }
+  match_fields {
+    id: 1
+    name: "local_metadata.ua_next_hop"
+    bitwidth: 128
+    match_type: LPM
+  }
+  action_refs {
+    id: 33210883
+  }
+  action_refs {
+    id: 21257015
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 43936431
+    name: "IngressPipeImpl.acl"
+    alias: "acl"
+  }
+  match_fields {
+    id: 1
+    name: "standard_metadata.ingress_port"
+    bitwidth: 9
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "hdr.ethernet.dst_addr"
+    bitwidth: 48
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "hdr.ethernet.src_addr"
+    bitwidth: 48
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
+    name: "hdr.ethernet.ether_type"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 5
+    name: "local_metadata.ip_proto"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 6
+    name: "local_metadata.icmp_type"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 7
+    name: "local_metadata.l4_src_port"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 8
+    name: "local_metadata.l4_dst_port"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 28447560
+  }
+  action_refs {
+    id: 28396054
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 48177760
+    name: "IngressPipeImpl.set_switch_id_table"
+    alias: "set_switch_id_table"
+  }
+  action_refs {
+    id: 32766929
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 28396054
+    name: "IngressPipeImpl.drop"
+    alias: "drop"
+  }
+}
+actions {
+  preamble {
+    id: 23654904
+    name: "IngressPipeImpl.set_output_port"
+    alias: "set_output_port"
+  }
+  params {
+    id: 1
+    name: "port_num"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 23394961
+    name: "IngressPipeImpl.set_next_hop"
+    alias: "set_next_hop"
+  }
+  params {
+    id: 1
+    name: "next_hop"
+    bitwidth: 48
+  }
+}
+actions {
+  preamble {
+    id: 22238276
+    name: "IngressPipeImpl.srv6_end"
+    alias: "srv6_end"
+  }
+}
+actions {
+  preamble {
+    id: 24031843
+    name: "IngressPipeImpl.srv6_end_x"
+    alias: "srv6_end_x"
+  }
+  params {
+    id: 1
+    name: "next_hop"
+    bitwidth: 128
+  }
+}
+actions {
+  preamble {
+    id: 29883710
+    name: "IngressPipeImpl.srv6_end_dx6"
+    alias: "srv6_end_dx6"
+  }
+}
+actions {
+  preamble {
+    id: 30328617
+    name: "IngressPipeImpl.srv6_end_t"
+    alias: "srv6_end_t"
+  }
+}
+actions {
+  preamble {
+    id: 24384261
+    name: "IngressPipeImpl.srv6_end_encaps"
+    alias: "srv6_end_encaps"
+  }
+  params {
+    id: 1
+    name: "src_addr"
+    bitwidth: 128
+  }
+  params {
+    id: 2
+    name: "s1"
+    bitwidth: 128
+  }
+}
+actions {
+  preamble {
+    id: 33210883
+    name: "IngressPipeImpl.xconnect_act"
+    alias: "xconnect_act"
+  }
+  params {
+    id: 1
+    name: "next_hop"
+    bitwidth: 48
+  }
+}
+actions {
+  preamble {
+    id: 28447560
+    name: "IngressPipeImpl.clone_to_cpu"
+    alias: "clone_to_cpu"
+  }
+}
+actions {
+  preamble {
+    id: 32766929
+    name: "IngressPipeImpl.set_switch_id"
+    alias: "set_switch_id"
+  }
+  params {
+    id: 1
+    name: "id"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 26004154
+    name: "IngressPipeImpl.put_switchID"
+    alias: "put_switchID"
+  }
+}
+actions {
+  preamble {
+    id: 21907273
+    name: "IngressPipeImpl.put_inPortID"
+    alias: "put_inPortID"
+  }
+}
+actions {
+  preamble {
+    id: 17015249
+    name: "IngressPipeImpl.put_ePortID"
+    alias: "put_ePortID"
+  }
+}
+actions {
+  preamble {
+    id: 29982692
+    name: "IngressPipeImpl.put_inTimeStamp"
+    alias: "put_inTimeStamp"
+  }
+}
+actions {
+  preamble {
+    id: 21879407
+    name: "IngressPipeImpl.put_qDepth"
+    alias: "put_qDepth"
+  }
+}
+actions {
+  preamble {
+    id: 26491500
+    name: "IngressPipeImpl.put_qDelay"
+    alias: "put_qDelay"
+  }
+}
+actions {
+  preamble {
+    id: 33403171
+    name: "EgressPipeImpl.put_eTimeStamp"
+    alias: "put_eTimeStamp"
+  }
+}
+actions {
+  preamble {
+    id: 24455753
+    name: "EgressPipeImpl.put_proDelay"
+    alias: "put_proDelay"
+  }
+}
+controller_packet_metadata {
+  preamble {
+    id: 81826293
+    name: "packet_in"
+    alias: "packet_in"
+    annotations: "@controller_header(\"packet_in\")"
+  }
+  metadata {
+    id: 1
+    name: "ingress_port"
+    bitwidth: 9
+  }
+  metadata {
+    id: 2
+    name: "_pad"
+    bitwidth: 7
+  }
+}
+controller_packet_metadata {
+  preamble {
+    id: 76689799
+    name: "packet_out"
+    alias: "packet_out"
+    annotations: "@controller_header(\"packet_out\")"
+  }
+  metadata {
+    id: 1
+    name: "egress_port"
+    bitwidth: 9
+  }
+  metadata {
+    id: 2
+    name: "_pad"
+    bitwidth: 7
+  }
+}
+type_info {
+}
