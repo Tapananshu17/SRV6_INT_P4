@@ -16,30 +16,12 @@ def add_unicast_entry(sh, dst_mac, out_port):
     te.insert()
     print(f"Unicast entry added: {dst_mac} -> port {out_port}")
 
-
-def add_multicast_entry(sh, dst_mac, group_id):
-    te = sh.TableEntry('multicast')(action='set_multicast_group')
-    te.match["hdr.ethernet.dst_addr"] = dst_mac
-    te.action["gid"] = group_id
-    te.insert()
-    print(f"Multicast entry added: {dst_mac} -> group {group_id}")
-
-
-def add_routing_v4_entry(sh, dst_ip, next_hop_mac):
-    te = sh.TableEntry('routing_v4')(action='set_next_hop_v4')
-    te.match["hdr.ipv4.dst_addr"] = dst_ip  # LPM format: '10.0.1.0/24'
-    te.action["next_hop"] = next_hop_mac
-    te.insert()
-    print(f"Routing_v4 entry added: {dst_ip} -> next hop {next_hop_mac}")
-
-
 def add_xconnect_entry(sh, next_hop_mac):
     te = sh.TableEntry('xconnect_table')(action='xconnect_act')
     te.match["local_metadata.ua_next_hop"] = next_hop_mac
     te.action["next_hop"] = next_hop_mac
     te.insert()
     print(f"XConnect entry added for next hop {next_hop_mac}")
-
 
 def add_routing_v6_entry(sh, dst_ip, next_hop_mac):
     te = sh.TableEntry('routing_v6')(action='set_next_hop')
@@ -66,39 +48,6 @@ def add_srv6_localsid_entry(sh, dst_ip, action_name, next_hop=None, src_addr=Non
         te.action["s2"] = s2
     te.insert()
     print(f"SRv6 localsid entry added: {dst_ip} -> action {action_name}")
-
-
-def add_srv6_encap_entry(sh, dst_ip, action_name, src_addr=None, s1=None, s2=None):
-    """
-    Add entry to srv6_encap or srv6_encap_v4 table
-    action_name: 'usid_encap_1', 'usid_encap_2', 'usid_encap_1_v4', 'usid_encap_2_v4'
-    """
-    table_name = 'srv6_encap' if 'v4' not in action_name else 'srv6_encap_v4'
-    te = sh.TableEntry(table_name)(action=action_name)
-    te.match["hdr.ipv6.dst_addr" if 'v4' not in action_name else "hdr.ipv4.dst_addr"] = dst_ip
-    if src_addr is not None:
-        te.action["src_addr"] = src_addr
-    if s1 is not None:
-        te.action["s1"] = s1
-    if s2 is not None:
-        te.action["s2"] = s2
-    te.insert()
-    print(f"{table_name} entry added: {dst_ip} -> action {action_name}")
-
-def add_ndp_reply_entry(sh, target_ipv6, target_mac):
-    """
-    Add an entry to the ndp_reply_table to respond to NS messages.
-    
-    Args:
-        sh: P4Runtime shell module (already set up)
-        target_ipv6: IPv6 address of the router interface (string)
-        target_mac: MAC address to use in the NA reply (string)
-    """
-    te = sh.TableEntry('ndp_reply_table')(action='ndp_ns_to_na')
-    te.match["hdr.ndp.target_addr"] = target_ipv6
-    te.action["target_mac"] = target_mac
-    te.insert()
-    print(f"NDP reply entry added: {target_ipv6} -> {target_mac}")
 
 ROUTER_CONFIGS = {}
 
@@ -162,9 +111,17 @@ else:
     set_IPv6('2001:1:3::1/128','00:00:00:00:00:30','3')
 
     set_IPv6('2001:1:b::fa/128','00:00:00:00:00:ab','4')
-    # set_IPv6('2001:1:1::2/128','00:00:00:00:00:ab','4',only_IP=True)
-    # set_IPv6('2001:1:2::2/128','00:00:00:00:00:ab','4',only_IP=True)
-    # set_IPv6('2001:1:3::2/128','00:00:00:00:00:ab','4',only_IP=True)
+
+    # add_srv6_localsid_entry(sh,'2001:1:1::1/128','srv6_end')
+    # add_srv6_localsid_entry(sh,'2001:1:2::1/128','srv6_end')
+    # add_srv6_localsid_entry(sh,'2001:1:3::1/128','srv6_end')
+    # add_srv6_localsid_entry(sh,'2001:1:b::fa/128','srv6_end')
+
+
+    add_srv6_localsid_entry(sh,'2001:1:1::fa/128','srv6_end')
+    add_srv6_localsid_entry(sh,'2001:1:2::fa/128','srv6_end')
+    add_srv6_localsid_entry(sh,'2001:1:3::fa/128','srv6_end')
+    add_srv6_localsid_entry(sh,'2001:1:a::fb/128','srv6_end')
 
     # set_switch_id(sh,"1")
 
@@ -173,9 +130,11 @@ else:
     set_IPv6('2001:1:3::2/128','00:00:00:00:00:31','3')
 
     set_IPv6('2001:1:a::fb/128','00:00:00:00:00:ba','4')
-    # set_IPv6('2001:1:1::1/128','00:00:00:00:00:ba','4',only_IP=True)
-    # set_IPv6('2001:1:2::1/128','00:00:00:00:00:ba','4',only_IP=True)
-    # set_IPv6('2001:1:3::1/128','00:00:00:00:00:ba','4',only_IP=True)
+
+    add_srv6_localsid_entry(sh,'2001:1:1::fb/128','srv6_end')
+    add_srv6_localsid_entry(sh,'2001:1:2::fb/128','srv6_end')
+    add_srv6_localsid_entry(sh,'2001:1:3::fb/128','srv6_end')
+    add_srv6_localsid_entry(sh,'2001:1:b::fa/128','srv6_end')
 
     #set_switch_id(sh,"2")
 

@@ -124,8 +124,8 @@ rtt min/avg/max/mdev = 14.588/26.827/47.646/14.796 ms
 ```
 
 ```
-mininet> h2 /home/p4/src/p4dev-python-venv/bin/python3 mininet/reciever.py --int h2-eth0 &
-mininet> h1 /home/p4/src/p4dev-python-venv/bin/python3 mininet/sender.py --int h1-eth0 00:00:00:00:00:10 2001:1:1::1 00:00:00:00:00:20 2001:1:2::1
+mininet> h2 python3 mininet/reciever.py --int h2-eth0 &
+mininet> h1 python3 mininet/sender.py --int h1-eth0 00:00:00:00:00:10 2001:1:1::1 00:00:00:00:00:20 2001:1:2::1
 ```
 
 ```

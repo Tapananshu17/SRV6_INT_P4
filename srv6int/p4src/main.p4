@@ -229,24 +229,26 @@ control IngressPipeImpl (inout parsed_headers_t hdr,
 	        }
 
      
-	    
-        switch(srv6_localsid_table.apply().action_run) {
-            srv6_end: {
-                
-                if (hdr.srv6h.segment_left > 0) {
+	    if(hdr.srv6h.isValid()){
+
+            switch(srv6_localsid_table.apply().action_run) {
+                srv6_end: {
                     
-                    hdr.ipv6.dst_addr = local_metadata.next_srv6_sid;
-                    
-                    hdr.srv6h.segment_left = hdr.srv6h.segment_left - 1;
-                } else {
-                    
-                    hdr.ipv6.dst_addr = hdr.srv6_list[0].segment_id;
+                    if (hdr.srv6h.segment_left > 0) {
+                        
+                        hdr.ipv6.dst_addr = local_metadata.next_srv6_sid;
+                        
+                        hdr.srv6h.segment_left = hdr.srv6h.segment_left - 1;
+                    } else {
+                        
+                        hdr.ipv6.dst_addr = hdr.srv6_list[0].segment_id;
+                    }
                 }
-            }
-            
-            
-            
-        }        
+                
+                
+                
+            }        
+        }
         
         if (!local_metadata.xconnect) {
             routing_v6.apply();
