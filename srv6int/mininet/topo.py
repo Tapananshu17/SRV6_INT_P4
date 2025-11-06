@@ -6,7 +6,7 @@ from mininet.net import Mininet
 from mininet.node import RemoteController
 from mininet.topo import Topo
 
-from bmv2 import ONOSBmv2Switch
+from bmv2_cleaned import ONOSBmv2Switch
 from host6 import IPv6Host
 
 CPU_PORT = 255
@@ -71,7 +71,7 @@ def TwoRouters():
     r2.AddIPv6Addrs()
     net.start();CLI(net);net.stop()
 
-def TwoRoutersThreeHosts():
+def TwoRoutersThreeHosts(cli=False,only_cli=False):
     ctrlIP = "10.0.0.1"
     net = Mininet(controller=RemoteController)
     c0 = net.addController('c0', ip=ctrlIP)
@@ -130,9 +130,14 @@ def TwoRoutersThreeHosts():
     h1.AddIPv6Addrs(h1_ipv6_addrs)
     h2.AddIPv6Addrs(h2_ipv6_addrs)
     h3.AddIPv6Addrs(h3_ipv6_addrs)
-    net.start();CLI(net);net.stop()
+    net.start()
+    if only_cli:CLI(net)
+    else:CLI(net,script="mininet/mininet_script.txt")
+    if cli:CLI(net)
+    net.stop()
 
 if __name__=="__main__":
-    TwoRoutersThreeHosts()
-    # TwoRouters()
-    # OneRouter()
+    import sys
+    cli = ("--cli" in sys.argv)
+    only_cli = ("--only_cli" in sys.argv)
+    TwoRoutersThreeHosts(cli,only_cli)

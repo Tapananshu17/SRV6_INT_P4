@@ -1,7 +1,6 @@
 import json,sys
 from p4runtime_sh.shell import TableEntry
-import p4runtime_sh.shell as sh
-
+import p4runtime_sh_module.shell as sh
 
 def set_switch_id(sh,Id):
     te = sh.TableEntry("set_switch_id_table")(action="set_switch_id")
@@ -38,14 +37,10 @@ def add_srv6_localsid_entry(sh, dst_ip, action_name, next_hop=None, src_addr=Non
     """
     te = sh.TableEntry('srv6_localsid_table')(action=action_name)
     te.match["hdr.ipv6.dst_addr"] = dst_ip
-    if next_hop is not None:
-        te.action["next_hop"] = next_hop
-    if src_addr is not None:
-        te.action["src_addr"] = src_addr
-    if s1 is not None:
-        te.action["s1"] = s1
-    if s2 is not None:
-        te.action["s2"] = s2
+    if next_hop is not None:te.action["next_hop"] = next_hop
+    if src_addr is not None:te.action["src_addr"] = src_addr
+    if s1 is not None:te.action["s1"] = s1
+    if s2 is not None:te.action["s2"] = s2
     te.insert()
     print(f"SRv6 localsid entry added: {dst_ip} -> action {action_name}")
 
@@ -109,26 +104,18 @@ else:
     set_IPv6('2001:1:1::1/128','00:00:00:00:00:10','1',router_num=1)
     set_IPv6('2001:1:2::1/128','00:00:00:00:00:20','2')
     set_IPv6('2001:1:3::1/128','00:00:00:00:00:30','3')
-
     set_IPv6('2001:1:b::fa/128','00:00:00:00:00:ab','4')
-
-    # add_srv6_localsid_entry(sh,'2001:1:1::1/128','srv6_end')
-    # add_srv6_localsid_entry(sh,'2001:1:2::1/128','srv6_end')
-    # add_srv6_localsid_entry(sh,'2001:1:3::1/128','srv6_end')
-    # add_srv6_localsid_entry(sh,'2001:1:b::fa/128','srv6_end')
-
 
     add_srv6_localsid_entry(sh,'2001:1:1::fa/128','srv6_end')
     add_srv6_localsid_entry(sh,'2001:1:2::fa/128','srv6_end')
     add_srv6_localsid_entry(sh,'2001:1:3::fa/128','srv6_end')
     add_srv6_localsid_entry(sh,'2001:1:a::fb/128','srv6_end')
 
-    # set_switch_id(sh,"1")
+    set_switch_id(sh,"1")
 
     set_IPv6('2001:1:1::2/128','00:00:00:00:00:11','1',router_num=2)
     set_IPv6('2001:1:2::2/128','00:00:00:00:00:21','2')
     set_IPv6('2001:1:3::2/128','00:00:00:00:00:31','3')
-
     set_IPv6('2001:1:a::fb/128','00:00:00:00:00:ba','4')
 
     add_srv6_localsid_entry(sh,'2001:1:1::fb/128','srv6_end')
@@ -136,6 +123,6 @@ else:
     add_srv6_localsid_entry(sh,'2001:1:3::fb/128','srv6_end')
     add_srv6_localsid_entry(sh,'2001:1:b::fa/128','srv6_end')
 
-    #set_switch_id(sh,"2")
+    set_switch_id(sh,"2")
 
 sh.teardown()
