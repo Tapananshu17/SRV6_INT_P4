@@ -25,7 +25,7 @@ from traitlets.config.loader import Config
 from IPython.terminal.prompts import Prompts, Token
 import os.path
 import sys
-from p4runtime_sh.p4runtime import (P4RuntimeClient, P4RuntimeException, parse_p4runtime_error,
+from p4runtime_sh_module.p4runtime import (P4RuntimeClient, P4RuntimeException, parse_p4runtime_error,
                                     SSLOptions)
 from p4.v1 import p4runtime_pb2
 from p4.config.v1 import p4info_pb2
