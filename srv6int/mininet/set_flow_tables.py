@@ -1,5 +1,5 @@
 import json,sys
-from p4runtime_sh.shell import TableEntry
+from p4runtime_sh_module.shell import TableEntry
 import p4runtime_sh_module.shell as sh
 
 def set_switch_id(sh,Id):
