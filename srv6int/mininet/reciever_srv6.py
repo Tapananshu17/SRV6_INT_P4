@@ -37,13 +37,13 @@ if INT:
             bitmap = (int(c) for c in bitmap[:10])
             meta_sizes = [8,8,8,48,48,16,24,32,32,32]
             l = sum(x*y for x,y in zip(bitmap,meta_sizes))
-            D["metadata bytes"] = l
+            D["metadata bits"] = l
             l = l//4
-            D["meta_list"] = pack_bytes[36:36+l]
-            D["IPv6feilds"] = pack_bytes[36+l:36+l+16] # 8 bytes
-            D["dst_IP"] = pack_bytes[36+l+16:36+l+32+16] # 16 bytes
-            D["src_IP"] = pack_bytes[36+l+16+32:36+l+64+16] # 16 bytes
-            D["srv6"] = pack_bytes[36+l+64+16:]
+            D["meta_list"] = pack_bytes[36:36+n*l]
+            D["IPv6feilds"] = pack_bytes[36+n*l:36+n*l+16] # 8 bytes
+            D["dst_IP"] = pack_bytes[36+n*l+16:36+n*l+32+16] # 16 bytes
+            D["src_IP"] = pack_bytes[36+n*l+16+32:36+n*l+64+16] # 16 bytes
+            D["srv6"] = pack_bytes[36+n*l+64+16:]
             print("Received INT probe:", pack_bytes,file=f,flush=True)
             for feild,val in D.items():print('\t',feild,":",val,file=f,flush=True)
 
