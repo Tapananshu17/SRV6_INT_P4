@@ -1,6 +1,7 @@
 import socket, sys, time, threading
 from scapy.all import *
 from scapy.layers.inet6 import IPv6ExtHdrRouting
+import json
 
 # Define custom INT header (example placeholder)
 class INTHdr(Packet):
@@ -47,11 +48,9 @@ def listen_for_results(listen_ip, port):
         
         # Decode the data payload sent by receiver.py
         payload = data.decode()
-        hop_count, bitmap, meta_list = payload.split('|')
-        
-        print(f"Hop Count: {hop_count}")
-        print(f"Bitmap: {bitmap}")
-        print(f"Raw Meta List: {meta_list}")
+        meta_list = json.loads(payload)
+        for key,value in meta_list.items():
+            print(f"{key} : {value}")
         print("------------------------------------")
         
     except Exception as e:
@@ -61,7 +60,7 @@ def listen_for_results(listen_ip, port):
             s_udp.close()
         print("Listener thread exiting.")
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     bind_layers(Ether, INTHdr, type=0xFFFF)  # INT
 
     args = [x for x in sys.argv if not x.startswith("-")]
