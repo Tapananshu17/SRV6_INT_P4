@@ -55,13 +55,13 @@ This CSV file contains information about the IP and MAC addresses associated wit
 
 1. $(A,B,\text{IP}_A,\text{MAC}_A,\text{IP}_B,\text{MAC}_B)$ where $A,B$ are names of nodes in the Mininet topology, $\text{MAC}_A,\text{IP}_A$ are the MAC and IP addresses on $A$'s interfaces for the communication link and $\text{MAC}_B,\text{IP}_B$ are for $B$
 
-2. $(A,_,\text{IP}_A,\text{MAC}_A,\text{IP}_B,_)$ where $A$ is a host with IP address $\text{IP}_A$, MAC address $\text{MAC}_A$ and default gateway $\text{IP}_B$
+2. $(A,\_,\text{IP}_A,\text{MAC}_A,\text{IP}_B,\_)$ where $A$ is a host with IP address $\text{IP}_A$, MAC address $\text{MAC}_A$ and default gateway $\text{IP}_B$
 
 This file is used in run-time to create the topology and to run routing algorithms such as OSPF, following which, the table entries are computed for each P4 switch and it is programmed. 
 Changing this file is akin to changing the topology. In essense, this CSV file is a programming interface.
 The topology currently implemented is :
 
-![Topology](mininet/topo.png)
+![Topology](mininet/topo.png){height=200px}
 
 #### `flow.json`
 
@@ -103,3 +103,275 @@ Mininet allows for running scripts. This is one such script. It handles running 
 This is the entry point. This program creates the Mininet topology and runs the `mininet_script.txt` script. Additionaly, it opens the CLI after that if `--cli` is passed in as an argument and skips running the Mininet script if `--only_cli` is passed. 
 
 This also creates a visualisation for the topology using `graphviz`. The `dot` code is stored in `topo` (no extension) and the image is written to `topo.png`.
+
+## Example Execution
+
+### Compiling
+
+```
+~/SRV6_INT_P4/srv6int$ cd p4src
+~/SRV6_INT_P4/srv6int/p4src$ ./compile.sh 
+```
+
+### Creating Topology
+
+First clean the past instance of Mininet using:
+
+```sh
+sudo mn -c 1>/dev/null 2>/dev/null
+```
+
+Then, run the `topo.py` program as:
+
+```sh
+sudo python3 mininet/topo.py --only_cli
+```
+
+The putput will be
+
+```
+~/SRV6_INT_P4/srv6int$ sudo mn -c 1>/dev/null 2>/dev/null
+~/SRV6_INT_P4/srv6int$ sudo python3 mininet/topo.py --only_cli
+
+Edges
+['h1', '', '2001:1:1::1/64', '00:00:00:00:00:10', '2001:1:1::fa', '']
+['h2', '', '2001:1:2::2/64', '00:00:00:00:00:21', '2001:1:2::fb', '']
+['h3', '', '2001:1:3::1/64', '00:00:00:00:00:30', '2001:1:3::fa', '']
+['s1', 'h1', '2001:1:1::fa/128', '00:00:00:00:00:1a', '2001:1:1::1/128', '00:00:00:00:00:10']
+['s1', 'h3', '2001:1:3::fa/128', '00:00:00:00:00:3a', '2001:1:3::1/128', '00:00:00:00:00:30']
+['s2', 'h2', '2001:1:2::fb/128', '00:00:00:00:00:2b', '2001:1:2::2/128', '00:00:00:00:00:21']
+['s2', 'h3', '2001:1:3::fb/128', '00:00:00:00:00:3b', '2001:1:3::2/128', '00:00:00:00:00:31']
+['s1', 's2', '2001:1:b::fa/128', '00:00:00:00:00:ba', '2001:1:a::fb/128', '00:00:00:00:00:ab']
+
+Hosts: ['h1', 'h3', 'h2']
+Switches: ['s1', 's2']
+
+Host config
+h1 : ['2001:1:1::1/64', '00:00:00:00:00:10', '2001:1:1::fa']
+h2 : ['2001:1:2::2/64', '00:00:00:00:00:21', '2001:1:2::fb']
+h3 : ['2001:1:3::1/64', '00:00:00:00:00:30', '2001:1:3::fa']
+
+Addresses
+        s1
+                2001:1:1::fa/128,00:00:00:00:00:1a
+                2001:1:3::fa/128,00:00:00:00:00:3a
+                2001:1:b::fa/128,00:00:00:00:00:ba
+        h1
+                2001:1:1::1/128,00:00:00:00:00:10
+        h3
+                2001:1:3::1/128,00:00:00:00:00:30
+                2001:1:3::2/128,00:00:00:00:00:31
+        s2
+                2001:1:2::fb/128,00:00:00:00:00:2b
+                2001:1:3::fb/128,00:00:00:00:00:3b
+                2001:1:a::fb/128,00:00:00:00:00:ab
+        h2
+                2001:1:2::2/128,00:00:00:00:00:21
+Unable to contact the remote controller at 10.0.0.1:6653
+Unable to contact the remote controller at 10.0.0.1:6633
+Setting remote controller to 10.0.0.1:6653
+added link ('s1', 'h1')
+added link ('s1', 'h3')
+added link ('s2', 'h2')
+added link ('s2', 'h3')
+added link ('s1', 's2')
+2001:1:1::fa/128 00:00:00:00:00:1a
+Assigned 2001:1:1::fa/128 to s1:s1-eth1
+2001:1:3::fa/128 00:00:00:00:00:3a
+Assigned 2001:1:3::fa/128 to s1:s1-eth2
+2001:1:b::fa/128 00:00:00:00:00:ba
+Assigned 2001:1:b::fa/128 to s1:s1-eth3
+2001:1:2::fb/128 00:00:00:00:00:2b
+Assigned 2001:1:2::fb/128 to s2:s2-eth1
+2001:1:3::fb/128 00:00:00:00:00:3b
+Assigned 2001:1:3::fb/128 to s2:s2-eth2
+2001:1:a::fb/128 00:00:00:00:00:ab
+Assigned 2001:1:a::fb/128 to s2:s2-eth3
+2001:1:1::1/128 00:00:00:00:00:10
+Assigned 2001:1:1::1/128 to h1:h1-eth0
+2001:1:3::1/128 00:00:00:00:00:30
+Assigned 2001:1:3::1/128 to h3:h3-eth0
+2001:1:3::2/128 00:00:00:00:00:31
+Assigned 2001:1:3::2/128 to h3:h3-eth1
+2001:1:2::2/128 00:00:00:00:00:21
+Assigned 2001:1:2::2/128 to h2:h2-eth0
+..⚡️ simple_switch_grpc @ 1422056
+.....⚡️ simple_switch_grpc @ 1422075
+mininet> 
+```
+
+This will also create the `flow.json` file.
+
+### Routing algorithm and table entries
+
+Run the shortest path algorithm using
+
+```
+c0 python3 mininet/ospf.py
+```
+
+Then set the flow tables as 
+
+```
+c0 python3 mininet/set_flow_tables.py
+```
+
+The output of the second command is large. A truncated version is shown here.
+
+```
+mininet> c0 python3 mininet/ospf.py
+mininet> c0 python3 mininet/set_flow_tables.py
+. . .
+field_id: 1
+lpm {
+  value: " \001\000\001\000\003\000\000\000\000\000\000\000\000\000\001"
+  prefix_len: 128
+}
+
+param_id: 1
+value: "0"
+
+Routing_v6 entry added: 2001:1:3::1/128 -> next hop 00:00:00:00:00:30
+. . .
+s1 :
+('add_routing_v6_entry', '2001:1:3::1/128', '00:00:00:00:00:30')
+('add_unicast_entry', '00:00:00:00:00:ab', '3')
+('add_srv6_localsid_entry', '2001:1:1::fa/128', 'srv6_end', None, None, None, None)
+('add_routing_v6_entry', '2001:1:3::2/128', '00:00:00:00:00:30')
+. . .
+('add_routing_v6_entry', '2001:1:1::1/128', '00:00:00:00:00:10')
+. . .
+s2 :
+('add_routing_v6_entry', '2001:1:2::2/128', '00:00:00:00:00:21')
+. . .
+('add_unicast_entry', '00:00:00:00:00:21', '1')
+```
+
+Now, there is full connectivity. This can be verified using `ping6`
+
+```
+mininet> h1 ping6 h2
+PING 2001:1:2::2(2001:1:2::2) 56 data bytes
+64 bytes from 2001:1:2::2: icmp_seq=1 ttl=62 time=4.42 ms
+64 bytes from 2001:1:2::2: icmp_seq=2 ttl=62 time=3.43 ms
+64 bytes from 2001:1:2::2: icmp_seq=3 ttl=62 time=4.37 ms
+64 bytes from 2001:1:2::2: icmp_seq=4 ttl=62 time=5.30 ms
+64 bytes from 2001:1:2::2: icmp_seq=5 ttl=62 time=2.79 ms
+^C
+--- 2001:1:2::2 ping statistics ---
+5 packets transmitted, 5 received, 0% packet loss, time 4006ms
+rtt min/avg/max/mdev = 2.791/4.062/5.303/0.868 ms
+```
+
+### Server and client
+
+You can set a receiver process on `h3` so that it will parse INT probes as :
+
+```
+h3 python3 mininet/reciever.py &
+```
+
+Then, `h1` can send SRv6 enabled INT probles with `h3` as the final destination as
+
+```
+h1 python3 mininet/sender_srv6.py h1-eth0 h1,s1,h3 01111
+```
+
+or as 
+
+```
+h1 python3 mininet/sender_srv6.py h1-eth0 00:00:00:00:00:10 2001:1:1::1 00:00:00:00:00:20 2001:1:1::fa 2001:1:3::2,2001:1:a::fb
+```
+
+On executing, we get this output :
+
+```
+mininet> h3 python3 mininet/reciever.py &
+mininet> h1 python3 mininet/sender_srv6.py h1-eth0 h1,s1,h3 01111
+arguments parsed
+src MAC : 00:00:00:00:00:10
+src IP : 2001:1:1::1
+dst MAC : 00:00:00:00:00:1a
+dst IP : 2001:1:1::fa
+srv6 SIDs : ['2001:1:3::1']
+INT header : 40078000
+SRv6 stuff : 3b0204010000000020010001000300000000000000000001
+Crafted Packet: 00000000001a000000000010ffff400780006000000000182b4020010001000100000000000000000001200100010001000000000000000000fa3b0204010000000020010001000300000000000000000001
+Listener thread started. Waiting for INT results on [2001:1:1::1]:9999...
+.
+Sent 1 packets.
+Probe packet sent on interface h1-eth0
+Main script finished.
+mininet> exit
+```
+
+The `tmp/received.txt` file will now have something like this :
+
+```
+Received packet with ethertype ffff on h3-eth0
+Received INT Probe: 00000000003000000000001affff40178000010200004313e97c00004313efac6000000000182b3f20010001000100000000000000000001200100010003000000000000000000013b0204000000000020010001000300000000000000000001
+	 dst_MAC : 000000000030
+	 src_MAC : 00000000001a
+	 ethertype : ffff
+	 inth : 40178000
+	 n : 1
+	 bitmap : 01111000000000000000
+	 metadata bits : 112
+	 meta_list : 010200004313e97c00004313efac
+	 IPv6feilds : 6000000000182b3f
+	 dst_IP_hex : 20010001000100000000000000000001
+	 src_IP_hex : 20010001000300000000000000000001
+	 srv6 : 3b0204000000000020010001000300000000000000000001
+	Parsed meta list:
+	 {'inPortID': 1, 'ePortID': 2, 'inTimeStamp': 1125378428, 'eTimeStamp': 1125380012}
+```
+
+To have the INT probe visit both `s1` and `s2`, we can use :
+
+```
+h1 python3 mininet/sender_srv6.py h1-eth0 h1,s1,s2,h3 01111
+```
+
+For example
+
+```
+mininet> h3 python3 mininet/reciever.py &
+mininet> h1 python3 mininet/sender_srv6.py h1-eth0 h1,s1,s2,h3 01111
+arguments parsed
+src MAC : 00:00:00:00:00:10
+src IP : 2001:1:1::1
+dst MAC : 00:00:00:00:00:1a
+dst IP : 2001:1:1::fa
+srv6 SIDs : ['2001:1:3::2', '2001:1:a::fb']
+INT header : 40078000
+SRv6 stuff : 3b040402010000002001000100030000000000000000000220010001000a000000000000000000fb
+Crafted Packet: 00000000001a000000000010ffff400780006000000000282b4020010001000100000000000000000001200100010001000000000000000000fa3b040402010000002001000100030000000000000000000220010001000a000000000000000000fb
+Listener thread started. Waiting for INT results on [2001:1:1::1]:9999...
+.
+Sent 1 packets.
+Probe packet sent on interface h1-eth0
+Main script finished.
+mininet> exit
+```
+
+This now gives two sets of metadata entries in the filled probe.
+
+```
+Received packet with ethertype ffff on h3-eth1
+Received INT Probe: 0000000000310000000000abffff402780000103000002773447000002773a5503020000027909ea00000279114f6000000000282b3e20010001000100000000000000000001200100010003000000000000000000023b040400010000002001000100030000000000000000000220010001000a000000000000000000fb
+	 dst_MAC : 000000000031
+	 src_MAC : 0000000000ab
+	 ethertype : ffff
+	 inth : 40278000
+	 n : 2
+	 bitmap : 01111000000000000000
+	 metadata bits : 112
+	 meta_list : 0103000002773447000002773a5503020000027909ea00000279114f
+	 IPv6feilds : 6000000000282b3e
+	 dst_IP_hex : 20010001000100000000000000000001
+	 src_IP_hex : 20010001000300000000000000000002
+	 srv6 : 3b040400010000002001000100030000000000000000000220010001000a000000000000000000fb
+	Parsed meta list:
+	 {'inPortID': 1, 'ePortID': 3, 'inTimeStamp': 41366599, 'eTimeStamp': 41368149}
+	 {'inPortID': 3, 'ePortID': 2, 'inTimeStamp': 41486826, 'eTimeStamp': 41488719}
+```

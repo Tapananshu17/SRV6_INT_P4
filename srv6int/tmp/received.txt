@@ -1,54 +1,26 @@
 Received packet with ethertype 86dd on h3-eth1
 Received packet with ethertype 86dd on h3-eth1
 Received packet with ethertype 86dd on h3-eth0
+Received packet with ethertype 86dd on h3-eth0
 Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype ffff on h3-eth0
-Received INT Probe: 00000000003000000000001affff40178000010200000022b17500000022b7e96000000000182b3f20010001000100000000000000000001200100010003000000000000000000013b0204000000000020010001000300000000000000000001
-	 dst_MAC : 000000000030
-	 src_MAC : 00000000001a
+Received packet with ethertype ffff on h3-eth1
+Received INT Probe: 0000000000310000000000abffff402780000103000002773447000002773a5503020000027909ea00000279114f6000000000282b3e20010001000100000000000000000001200100010003000000000000000000023b040400010000002001000100030000000000000000000220010001000a000000000000000000fb
+	 dst_MAC : 000000000031
+	 src_MAC : 0000000000ab
 	 ethertype : ffff
-	 inth : 40178000
-	 n : 1
+	 inth : 40278000
+	 n : 2
 	 bitmap : 01111000000000000000
 	 metadata bits : 112
-	 meta_list : 010200000022b17500000022b7e9
-	 IPv6feilds : 6000000000182b3f
+	 meta_list : 0103000002773447000002773a5503020000027909ea00000279114f
+	 IPv6feilds : 6000000000282b3e
 	 dst_IP_hex : 20010001000100000000000000000001
-	 src_IP_hex : 20010001000300000000000000000001
-	 srv6 : 3b0204000000000020010001000300000000000000000001
+	 src_IP_hex : 20010001000300000000000000000002
+	 srv6 : 3b040400010000002001000100030000000000000000000220010001000a000000000000000000fb
 	Parsed meta list:
-	 {'inPortID': 1, 'ePortID': 2, 'inTimeStamp': 2273653, 'eTimeStamp': 2275305}
+	 {'inPortID': 1, 'ePortID': 3, 'inTimeStamp': 41366599, 'eTimeStamp': 41368149}
+	 {'inPortID': 3, 'ePortID': 2, 'inTimeStamp': 41486826, 'eTimeStamp': 41488719}
 Received packet with ethertype 86dd on lo
 Received packet with ethertype 86dd on lo
 Received packet with ethertype 86dd on lo
 Received packet with ethertype 86dd on lo
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth1
