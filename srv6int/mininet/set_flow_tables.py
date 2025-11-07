@@ -48,25 +48,25 @@ ROUTER_CONFIGS = {}
 
 pipe_config = sh.FwdPipeConfig('p4src/p4info.txt', 'p4src/main.json')
 
-def connect_to_router(router_num):
+def connect_to_router(switch_name):
 
     global ROUTER_CONFIGS
 
     try:sh.teardown()
     except:print('teardown failed')
 
-    if router_num not in ROUTER_CONFIGS:
+    if switch_name not in ROUTER_CONFIGS:
 
         # --- Load config ---
-        with open(f'tmp/bmv2-r{router_num}-netcfg.json') as f:netcfg = json.load(f)
-        mgmt_addr = netcfg['devices'][f'device:bmv2:r{router_num}']['basic']['managementAddress']
+        with open(f'tmp/bmv2-{switch_name}-netcfg.json') as f:netcfg = json.load(f)
+        mgmt_addr = netcfg['devices'][f'device:bmv2:{switch_name}']['basic']['managementAddress']
         grpc_addr = mgmt_addr.split('?')[0].replace('grpc://', '')
         device_id = int(mgmt_addr.split('device_id=')[1])
         rcf = {"device_id":device_id,"grpc_addr":grpc_addr}
-        ROUTER_CONFIGS[router_num] = rcf
+        ROUTER_CONFIGS[switch_name] = rcf
     
     else:
-        rcf = ROUTER_CONFIGS[router_num]
+        rcf = ROUTER_CONFIGS[switch_name]
         device_id = rcf['device_id']
         grpc_addr = rcf['grpc_addr']
 
@@ -79,50 +79,68 @@ def connect_to_router(router_num):
         # config=sh.FwdPipeConfig('p4src/p4info.txt', 'p4src/main.json')
     )
 
-def set_IPv6(dst_ipv6,dst_mac,out_port,router_num=None,only_IP=False):
-    if router_num is not None:connect_to_router(router_num)
+def set_IPv6(dst_ipv6,dst_mac,out_port,switch_name=None,only_IP=False):
+    if switch_name is not None:connect_to_router(switch_name)
     add_routing_v6_entry(sh, dst_ipv6, dst_mac)
     if not only_IP : add_unicast_entry(sh, dst_mac, str(out_port))
+
+
+def set_from_file(sh,mapping_file):
+    with open(mapping_file,'r') as mf:Flow = json.load(mf)
+    for s in Flow:
+        switch_id = int(s[1:])
+        connect_to_router(s)
+        set_switch_id(sh,str(switch_id))
+        for IP,MAC,port in Flow[s]['out']:
+            set_IPv6(IP,MAC,port)
+        for IP,MAC in Flow[s]['in']: 
+            add_srv6_localsid_entry(sh,IP,'srv6_end')
 
 
 # TwoRouters
 
 if "--2" in sys.argv:
 
-    set_IPv6('2001:1:1::1/64','00:00:00:00:00:10','1',router_num=1)
+    set_IPv6('2001:1:1::1/64','00:00:00:00:00:10','1',switch_name="s1")
     set_IPv6('2001:1:2::1/64','00:00:00:00:00:21','2')
     set_switch_id(sh,"1")
 
-    set_IPv6('2001:1:1::1/64','00:00:00:00:00:11','1',router_num=2)
+    set_IPv6('2001:1:1::1/64','00:00:00:00:00:11','1',switch_name="s2")
     set_IPv6('2001:1:2::1/64','00:00:00:00:00:20','2')
     set_switch_id(sh,"2")
 
 # TwoRoutersThreeHosts
 
-else:
+elif "--2-3" in sys.argv:
 
-    set_IPv6('2001:1:1::1/128','00:00:00:00:00:10','1',router_num=1)
+    set_IPv6('2001:1:1::1/128','00:00:00:00:00:10','1',switch_name="s1")
     set_IPv6('2001:1:2::1/128','00:00:00:00:00:20','2')
     set_IPv6('2001:1:3::1/128','00:00:00:00:00:30','3')
-    set_IPv6('2001:1:b::fa/128','00:00:00:00:00:ab','4')
+    # set_IPv6('2001:1:b::fa/128','00:00:00:00:00:ab','4')
+    set_IPv6('2001:1:a::fb/128','00:00:00:00:00:ab','4')
 
     add_srv6_localsid_entry(sh,'2001:1:1::fa/128','srv6_end')
     add_srv6_localsid_entry(sh,'2001:1:2::fa/128','srv6_end')
     add_srv6_localsid_entry(sh,'2001:1:3::fa/128','srv6_end')
-    add_srv6_localsid_entry(sh,'2001:1:a::fb/128','srv6_end')
+    # add_srv6_localsid_entry(sh,'2001:1:a::fb/128','srv6_end')
+    add_srv6_localsid_entry(sh,'2001:1:b::fa/128','srv6_end')
 
     set_switch_id(sh,"1")
 
-    set_IPv6('2001:1:1::2/128','00:00:00:00:00:11','1',router_num=2)
+    set_IPv6('2001:1:1::2/128','00:00:00:00:00:11','1',switch_name="s2")
     set_IPv6('2001:1:2::2/128','00:00:00:00:00:21','2')
     set_IPv6('2001:1:3::2/128','00:00:00:00:00:31','3')
-    set_IPv6('2001:1:a::fb/128','00:00:00:00:00:ba','4')
+    # set_IPv6('2001:1:a::fb/128','00:00:00:00:00:ba','4')
+    set_IPv6('2001:1:b::fa/128','00:00:00:00:00:ba','4')
 
     add_srv6_localsid_entry(sh,'2001:1:1::fb/128','srv6_end')
     add_srv6_localsid_entry(sh,'2001:1:2::fb/128','srv6_end')
     add_srv6_localsid_entry(sh,'2001:1:3::fb/128','srv6_end')
-    add_srv6_localsid_entry(sh,'2001:1:b::fa/128','srv6_end')
+    # add_srv6_localsid_entry(sh,'2001:1:b::fa/128','srv6_end')
+    add_srv6_localsid_entry(sh,'2001:1:a::fb/128','srv6_end')
 
     set_switch_id(sh,"2")
+
+else:set_from_file(sh,'mininet/flow.json')
 
 sh.teardown()
