@@ -65,12 +65,16 @@ if __name__ == "__main__":
     bind_layers(Ether, INTHdr, type=0xFFFF)  # INT
 
     args = [x for x in sys.argv if not x.startswith("-")]
-    if len(args) < 7 and len(args)!=3:
-        print("Usage: python sender.py <intf> <srcMAC> <srcIP> <dstMAC> <dstIP> <sid1,sid2,...>")
+    
+    if any(args[0].startswith(x+str(y)) for x in 'chsr' for y in range(10)):
+        args = args[1:]
+
+    if (len(args) < 7 and len(args)>4) or (len(args) < 3):
+        print("Usage: python3 sender.py <intf> <srcMAC> <srcIP> <dstMAC> <dstIP> <sid1,sid2,...> [<bitmap>]")
         sys.exit(1)
 
-    print("arguments parsed")
     intf = args[1]
+    default_inst_bitmap = 0b0000000100
     if ',' in args[2]:
         path = args[2]
         current_node,next_node,path = path.split(',',2)
@@ -78,19 +82,24 @@ if __name__ == "__main__":
         srcIP,srcMAC =lookup(next_node,current_node)
         srv6_sids = path_lookup(next_node,path)
         srv6_sids = srv6_sids[::-1]
+        if len(args) > 3:inst_bitmap = int(args[3] + "0"*(10-len(args[3])),2)
+        else:inst_bitmap = default_inst_bitmap
     else:
         srcMAC = args[2]
         srcIP = args[3]
         dstMAC = args[4]
         dstIP = args[5]
         srv6_sids = args[6].split(',')
+        if len(args) > 7:inst_bitmap = int(args[7] + "0"*(10-len(args[7])),2)
+        else:inst_bitmap = default_inst_bitmap
+    print("arguments parsed")
     print("src MAC :",srcMAC)
     print("src IP :",srcIP)
     print("dst MAC :",dstMAC)
     print("dst IP :",dstIP)
     print('srv6 SIDs :',srv6_sids)
 
-    inth = INTHdr(flag = 1, inst_bitmap=0b0000000100, M=0, hop_count=0)
+    inth = INTHdr(flag = 1, inst_bitmap=inst_bitmap, M=0, hop_count=0)
     print("INT header :",bytes(inth).hex())
     srv6_stuff = build_srh(srv6_sids)
     print("SRv6 stuff :",bytes(srv6_stuff).hex())

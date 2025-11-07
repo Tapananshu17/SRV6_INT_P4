@@ -47,7 +47,11 @@ def path_lookup(current_node,path,f=None):
         
 if __name__=="__main__":
     import sys
-    current_node = sys.argv[1]
-    path = sys.argv[2]   
+    if any(sys.argv[0].startswith(x+str(y)) 
+        for x in 'chsr' for y in range(10)):
+        args = sys.argv[1:]
+    else:args= sys.argv
+    current_node = args[1]
+    path = args[2]   
     if "--node" in sys.argv:print(lookup(current_node,path)) 
     else:print(path_lookup(current_node,path))
