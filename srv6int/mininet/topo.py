@@ -149,9 +149,11 @@ def custom_topo(file,mapping_file=None,cli=False,only_cli=False,vis=True):
     print('\nHosts:',hosts)
     switches = [s for s in nodes if s.startswith('s') or s.startswith('r')]
     print('Switches:',switches)
+    nodes = hosts + switches
     Addresses = {}
     Host_Addresses = {}
     Out_Adds = {}
+    counter = {node:0 for node in nodes}
     if vis:G = graphviz.Graph()
     for edge in edges:
         A,B,IP_A,MAC_A,IP_B,MAC_B = edge
@@ -162,17 +164,24 @@ def custom_topo(file,mapping_file=None,cli=False,only_cli=False,vis=True):
 
         assert all(x!='' for x in edge)
         
+        counter[A]+=1
+        counter[B]+=1
+
         if A not in Addresses:Addresses[A] = [[IP_A,MAC_A]]
         else:Addresses[A].append([IP_A,MAC_A])
-
-        if B not in Out_Adds:Out_Adds[B] = [[IP_A,MAC_A]]
-        else:Out_Adds[B].append([IP_A,MAC_A])
 
         if B not in Addresses:Addresses[B] = [[IP_B,MAC_B]]
         else:Addresses[B].append([IP_B,MAC_B])
 
-        if A not in Out_Adds:Out_Adds[A] = [[IP_B,MAC_B]]
-        else:Out_Adds[A].append([IP_B,MAC_B])
+        port_B = str(counter[B])
+        if B not in Out_Adds:Out_Adds[B] = {A:[[IP_A,MAC_A,port_B]]}
+        elif A not in Out_Adds[B]:Out_Adds[B][A] = [[IP_A,MAC_A,port_B]]
+        else: Out_Adds[B][A].append([IP_A,MAC_A,port_B]) 
+
+        port_A = str(counter[A])
+        if A not in Out_Adds:Out_Adds[A] = {B:[[IP_B,MAC_B,port_A]]}
+        elif B not in Out_Adds[A]:Out_Adds[A][B] = [[IP_B,MAC_B,port_A]]
+        else: Out_Adds[A][B].append([IP_B,MAC_B,port_A])
 
         if vis:G.edge(A,B)
 
@@ -219,10 +228,11 @@ def custom_topo(file,mapping_file=None,cli=False,only_cli=False,vis=True):
 
     if mapping_file:
         Flow = {}
-        for s in switches:
-            Flow[s] = {
-                "out":[x + [str(i+1)] for i,x in enumerate(Out_Adds[s])],
-                "in":Addresses[s]
+        for node in nodes:
+            Flow[node] = {
+                # "out":{x[0]:[y + [str(i+1)] for y in x[1]] for i,x in enumerate(Out_Adds[s].items())},
+                "out":Out_Adds[node],
+                "in":Addresses[node]
                 }
         # Out_Adds = {s:ads for s,ads in Out_Adds.items() if s in switches}
         with open(mapping_file,'w') as mf:

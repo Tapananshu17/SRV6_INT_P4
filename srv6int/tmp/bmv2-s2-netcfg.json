@@ -2,7 +2,7 @@
     "devices": {
         "device:bmv2:s2": {
             "basic": {
-                "managementAddress": "grpc://10.7.14.115:45881?device_id=1",
+                "managementAddress": "grpc://10.7.14.115:49117?device_id=1",
                 "driver": "bmv2",
                 "pipeconf": "org.onosproject.pipelines.basic"
             },
@@ -26,14 +26,6 @@
                 "3": {
                     "number": 3,
                     "name": "s2-eth3",
-                    "enabled": true,
-                    "removed": false,
-                    "type": "copper",
-                    "speed": 10000
-                },
-                "4": {
-                    "number": 4,
-                    "name": "s2-eth4",
                     "enabled": true,
                     "removed": false,
                     "type": "copper",

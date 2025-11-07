@@ -1,3 +1,4 @@
+c0 python3 mininet/ospf.py
 c0 python3 mininet/set_flow_tables.py
 h2 echo "h2: server starting.."
 h2 python3 mininet/reciever.py &

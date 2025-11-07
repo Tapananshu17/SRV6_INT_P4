@@ -1,6 +1,5 @@
 from mininet.node import Host
 
-
 class IPv6Host(Host):
 
     def config(self, ipv6, ipv6_gw=None, **params):
@@ -36,12 +35,3 @@ class IPv6Host(Host):
                 
                 self.cmd(f'ip -6 addr add {ipv6} dev {intf_name}') 
                 print(f"Assigned {ipv6} to {self.name}:{intf_name}")
-
-
-class SRv6Host(IPv6Host):
-
-    def config(self, ipv6, ipv6_gw=None, **params):
-        super(IPv6Host, self).config(**params)
-        
-        self.cmd('sysctl -w net.ipv6.conf.all.seg6_enabled=1')
-        self.cmd('sysctl -w net.ipv6.conf.%s.seg6_enabled=1' % self.defaultIntf())

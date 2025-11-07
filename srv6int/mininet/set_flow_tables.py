@@ -2,32 +2,46 @@ import json,sys
 from p4runtime_sh_module.shell import TableEntry
 import p4runtime_sh_module.shell as sh
 
+DONE = set()
+
 def set_switch_id(sh,Id):
+    k = ('set_switch_id',Id)
+    if k in DONE:return
     te = sh.TableEntry("set_switch_id_table")(action="set_switch_id")
     te.action["id"] = Id
     te.insert()
     print(f"switch IP set to {Id}")
+    DONE.add(k)
 
 def add_unicast_entry(sh, dst_mac, out_port):
+    k = ('add_unicast_entry',dst_mac, out_port)
+    if k in DONE: return
     te = sh.TableEntry('unicast')(action='set_output_port')
     te.match["hdr.ethernet.dst_addr"] = dst_mac
     te.action["port_num"] = out_port
     te.insert()
     print(f"Unicast entry added: {dst_mac} -> port {out_port}")
+    DONE.add(k)
 
 def add_xconnect_entry(sh, next_hop_mac):
+    k = ('add_xconnect_entry',next_hop_mac)
+    if k in DONE: return
     te = sh.TableEntry('xconnect_table')(action='xconnect_act')
     te.match["local_metadata.ua_next_hop"] = next_hop_mac
     te.action["next_hop"] = next_hop_mac
     te.insert()
     print(f"XConnect entry added for next hop {next_hop_mac}")
+    DONE.add(k)
 
 def add_routing_v6_entry(sh, dst_ip, next_hop_mac):
+    k = ('add_routing_v6_entry',dst_ip, next_hop_mac)
+    if k in DONE: return
     te = sh.TableEntry('routing_v6')(action='set_next_hop')
     te.match["hdr.ipv6.dst_addr"] = dst_ip  # LPM format: '2001:1:1::/64'
     te.action["next_hop"] = next_hop_mac
     te.insert()
     print(f"Routing_v6 entry added: {dst_ip} -> next hop {next_hop_mac}")
+    DONE.add(k)
 
 def add_srv6_localsid_entry(sh, dst_ip, action_name, next_hop=None, src_addr=None, s1=None, s2=None):
     """
@@ -35,6 +49,8 @@ def add_srv6_localsid_entry(sh, dst_ip, action_name, next_hop=None, src_addr=Non
     action_name: 'srv6_end', 'srv6_end_x', 'srv6_end_dx6', 'srv6_end_t', 'srv6_end_encaps', 'srv6_end_dx4', 'srv6_usid_un', 'srv6_usid_ua'
     For actions that require next_hop or SRv6 addresses, pass them as keyword args
     """
+    k = ('add_srv6_localsid_entry',dst_ip, action_name,next_hop,src_addr,s1,s2)
+    if k in DONE: return
     te = sh.TableEntry('srv6_localsid_table')(action=action_name)
     te.match["hdr.ipv6.dst_addr"] = dst_ip
     if next_hop is not None:te.action["next_hop"] = next_hop
@@ -43,6 +59,7 @@ def add_srv6_localsid_entry(sh, dst_ip, action_name, next_hop=None, src_addr=Non
     if s2 is not None:te.action["s2"] = s2
     te.insert()
     print(f"SRv6 localsid entry added: {dst_ip} -> action {action_name}")
+    DONE.add(k)
 
 ROUTER_CONFIGS = {}
 
@@ -50,7 +67,7 @@ pipe_config = sh.FwdPipeConfig('p4src/p4info.txt', 'p4src/main.json')
 
 def connect_to_router(switch_name):
 
-    global ROUTER_CONFIGS
+    global ROUTER_CONFIGS,DONE
 
     try:sh.teardown()
     except:print('teardown failed')
@@ -79,6 +96,8 @@ def connect_to_router(switch_name):
         # config=sh.FwdPipeConfig('p4src/p4info.txt', 'p4src/main.json')
     )
 
+    DONE = set()
+
 def set_IPv6(dst_ipv6,dst_mac,out_port,switch_name=None,only_IP=False):
     if switch_name is not None:connect_to_router(switch_name)
     add_routing_v6_entry(sh, dst_ipv6, dst_mac)
@@ -88,13 +107,19 @@ def set_IPv6(dst_ipv6,dst_mac,out_port,switch_name=None,only_IP=False):
 def set_from_file(sh,mapping_file):
     with open(mapping_file,'r') as mf:Flow = json.load(mf)
     for s in Flow:
+        if s.startswith('h'):continue
         switch_id = int(s[1:])
         connect_to_router(s)
         set_switch_id(sh,str(switch_id))
-        for IP,MAC,port in Flow[s]['out']:
-            set_IPv6(IP,MAC,port)
+        if "out_infered" in Flow[s]:entries = Flow[s]["out_infered"]
+        else:entries = Flow[s]["out"] 
+        for s2,L in entries.items():
+            for IP,MAC,port in L:
+                set_IPv6(IP,MAC,port)
         for IP,MAC in Flow[s]['in']: 
             add_srv6_localsid_entry(sh,IP,'srv6_end')
+        print(s,":")
+        for x in DONE: print(x)
 
 
 # TwoRouters
