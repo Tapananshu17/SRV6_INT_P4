@@ -1,46 +1,138 @@
-import socket,sys,binascii
+"""
+parses packet with INT and SRv6.
+Outputs to received.txt
+Logs to receiver_status.txt
+Sends metadata back to sender via UDP.
+"""
 
-f = open('tmp/received.txt', 'w')
-g = open('tmp/reciever_status.txt','w')
+import socket, binascii, json, sys
 
-INT = ( "--int" in sys.argv)
-args = [x for x in sys.argv if not x.startswith("-")]
+# Define UDP port for results
+UDP_RETURN_PORT = 9999
 
-print("arguments parsed",file=g,flush=True)
+# Pre-compute hex-to-binary conversion table
+HEX_TO_BIN = {hex(i)[2:]:'0'*(4-len(bin(i)[2:]))+bin(i)[2:] for i in range(16)}
 
-if INT:
-    iface = args[1]
-    print("interface :",iface,file=g,flush=True)
-    s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.ntohs(3))
-    s.bind((iface, 0))
-    print("socket ready",file=g,flush=True)
-    while True:
-        packet = s.recv(65535)
-        pack_bytes = str(binascii.hexlify(packet))[2:-1]
-        D = {}
+def send_results_back(destination_ip, port, payload_bytes, log_file):
+    """
+    Sends the processed results back to the sender via UDP.
+    """
+    try:
+        # Create a new socket to send the UDP reply
+        udp_sock = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
+        udp_sock.sendto(payload_bytes, (destination_ip, port))
+        udp_sock.close()
+        
+        print(f"Sent metadata results to [{destination_ip}]:{port}", file=log_file, flush=True)
+
+    except Exception as e:
+        print(f"Error sending UDP results: {e}", file=log_file, flush=True)
+
+
+def parse_meta_list(meta_list,bitmap_bits,hop_count,nibbles,f):
+    parsed_meta_list = []
+    feild_names = ["switchID","inPortID","ePortID","inTimeStamp",
+        "eTimeStamp","qDepth","qDelay","proDelay","linkLatency","leftBand",]
+    feild_sizes = [8,8,8,48,48,16,24,32,32,32]
+    feild_sizes = [x//4 for x in feild_sizes] # nibbles
+    for i in range(hop_count):
+        Meta = meta_list[i*nibbles:(i+1)*nibbles]
+        parsed_metadata = {}
+        for j in range(10):
+            if not bitmap_bits[j] : continue
+            val = Meta[:feild_sizes[j]]
+            Meta = Meta[feild_sizes[j]:]
+            name = feild_names[j]
+            val = int(val,16)
+            parsed_metadata[name] = val
+        parsed_meta_list.append(parsed_metadata)
+    return parsed_meta_list
+
+def parse_and_process_probe(pack_bytes, f, g):
+    """
+    Parses the INT/SRv6 probe packet and orchestrates sending the reply.
+    """
+    D = {}
+    try:
         D["dst_MAC"] = pack_bytes[0:12]
         D["src_MAC"] = pack_bytes[12:24]
-        D["ethertype"] = ethertype = pack_bytes[24:28]
-        print("Recieved packet with ethertype ", ethertype,file=f,flush=True)
-        if ethertype == 'ffff':
-            D["inth"] = pack_bytes[28:36]
-            D["src_IP"] = pack_bytes[-32:]
-            D["dst_IP"] = pack_bytes[-64:-32]
-            D["IPv6feilds"] = pack_bytes[-80:-64]
-            D["meta_list"] = pack_bytes[36:-80]
-            print("Received INT probe:", pack_bytes,file=f,flush=True)
-            for feild,val in D.items():print('\t',feild,":",val,file=f,flush=True)
+        D["ethertype"] = pack_bytes[24:28] # 'ffff'
+        
+        D["inth"] = inth = pack_bytes[28:36]
+        flag_and_M = inth[0]
+        hop_count = inth[1:3]
+        inst_bitmap = inth[3:8]
+        
+        n = int(hop_count,16)
+        D['n'] = n
+        
+        bitmap = ''.join([HEX_TO_BIN[c] for c in inst_bitmap])
+        D['bitmap'] = bitmap
+        
+        bitmap_bits = [int(c) for c in bitmap[:10]]
+        meta_sizes = [8,8,8,48,48,16,24,32,32,32]
+        l = sum(x*y for x,y in zip(bitmap_bits,meta_sizes))
+        D["metadata bits"] = l
+        l = l//4 # Convert bits to hex chars (nibbles)
+        
+        D["meta_list"] = pack_bytes[36:36+n*l]
+        D["IPv6feilds"] = pack_bytes[36+n*l:36+n*l+16]
+        D["dst_IP_hex"] = pack_bytes[36+n*l+16:36+n*l+32+16]
+        D["src_IP_hex"] = pack_bytes[36+n*l+16+32:36+n*l+64+16]
+        D["srv6"] = pack_bytes[36+n*l+64+16:]
+        
+        print("Received INT Probe:", pack_bytes, file=f, flush=True)
+        for feild,val in D.items():
+            print('\t',feild,":",val, file=f, flush=True)
+        
+        print("\tParsed meta list:", file=f, flush=True)
+        meta_list = parse_meta_list(D["meta_list"],bitmap_bits,n,l,f)
+        for metadata in meta_list:print('\t',metadata, file=f, flush=True)
+        # --- Prepare and Send Reply ---
+        
+        # Convert hex IP string to a usable IPv6 address
+        src_ip_addr = socket.inet_ntop(socket.AF_INET6, bytes.fromhex(D["src_IP_hex"]))
 
-else:
-    sock = socket.socket(socket.AF_INET6,socket.SOCK_RAW, socket.IPPROTO_UDP)
-    sock.bind(('2001:1:2::1', 5020))   # h2's IPv6 + port
-    print("socket ready",file=g,flush=True)
-    data, addr = sock.recvfrom(1024)    # Receive 1 datagram
-    print('Received from',addr,file=g,flush=True)
-    print(data.hex(),file=f,flush=True)
-sock.close()
+        payload_str = json.dumps(meta_list)
+        payload_bytes = payload_str.encode()
 
-print("socket closed",file=g,flush=True)
+        send_results_back(src_ip_addr, UDP_RETURN_PORT, payload_bytes, g)
+        
+    except Exception as e:
+        print(f"Error during packet parsing: {e}", file=g, flush=True)
+        print(f"Problematic packet bytes: {pack_bytes}", file=g, flush=True)
 
-f.close()
-g.close()
+# --- Main Execution ---
+if __name__ == "__main__":
+    try:
+        if len(sys.argv) == 1:
+            f = 'tmp/received.txt'
+            g = 'tmp/reciever_status.txt'
+        else:
+            f = sys.argv[1]
+            g = sys.argv[2]
+        f = open(f,'w')
+        g = open(g,'w') 
+        s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.ntohs(3))
+        print("socket ready", file=g, flush=True)
+        
+        while True:
+            packet, addr = s.recvfrom(65535)
+            pack_bytes = str(binascii.hexlify(packet))[2:-1]
+            ethertype = pack_bytes[24:28]
+            
+            print(f"Received packet with ethertype {ethertype} on {addr[0]}", file=f, flush=True)
+            
+            if ethertype == 'ffff':
+                parse_and_process_probe(pack_bytes, f, g)
+                
+    except Exception as e:
+        print(f"Critical error in main: {e}", file=g, flush=True)
+    finally:
+        print("Closing files and socket.", file=g, flush=True)
+        if 's' in locals():
+            s.close()
+        if 'f' in locals():
+            f.close()
+        if 'g' in locals():
+            g.close()

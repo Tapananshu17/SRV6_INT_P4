@@ -1,5 +1,29 @@
-Recieved packet with ethertype  86dd on h2-eth1
-Recieved packet with ethertype  86dd on h2-eth0
-Recieved packet with ethertype  86dd on h2-eth1
-Recieved packet with ethertype  86dd on h2-eth0
-Recieved packet with ethertype  86dd on h2-eth1
+Received packet with ethertype 86dd on h2-eth1
+Received packet with ethertype 86dd on h2-eth1
+Received packet with ethertype 86dd on h2-eth0
+Received packet with ethertype 86dd on h2-eth0
+Received packet with ethertype 86dd on h2-eth0
+Received packet with ethertype ffff on h2-eth1
+Received INT Probe: 0000000000210000000000abffff402ff00001010400000043f06e000000442a040000000000000035a202040200000047ff490000004862820000000000000051ba6000000000282b3e20010001000100000000000000000001200100010002000000000000000000023b040400010000002001000100020000000000000000000220010001000a000000000000000000fb
+	 dst_MAC : 000000000021
+	 src_MAC : 0000000000ab
+	 ethertype : ffff
+	 inth : 402ff000
+	 n : 2
+	 bitmap : 11111111000000000000
+	 metadata bits : 192
+	 meta_list : 01010400000043f06e000000442a040000000000000035a202040200000047ff490000004862820000000000000051ba
+	 IPv6feilds : 6000000000282b3e
+	 dst_IP_hex : 20010001000100000000000000000001
+	 src_IP_hex : 20010001000200000000000000000002
+	 srv6 : 3b040400010000002001000100020000000000000000000220010001000a000000000000000000fb
+	Parsed meta list:
+	 {'switchID': 1, 'inPortID': 1, 'ePortID': 4, 'inTimeStamp': 4452462, 'eTimeStamp': 4467204, 'qDepth': 0, 'qDelay': 0, 'proDelay': 13730}
+	 {'switchID': 2, 'inPortID': 4, 'ePortID': 2, 'inTimeStamp': 4718409, 'eTimeStamp': 4743810, 'qDepth': 0, 'qDelay': 0, 'proDelay': 20922}
+Received packet with ethertype 86dd on lo
+Received packet with ethertype 86dd on lo
+Received packet with ethertype 86dd on lo
+Received packet with ethertype 86dd on lo
+Received packet with ethertype 86dd on h2-eth1
+Received packet with ethertype 86dd on h2-eth1
+Received packet with ethertype 86dd on h2-eth1
