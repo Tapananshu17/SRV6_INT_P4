@@ -2,6 +2,7 @@ import socket, sys, time, threading
 from scapy.all import *
 from scapy.layers.inet6 import IPv6ExtHdrRouting
 import json
+from lookup_path import *
 
 # Define custom INT header (example placeholder)
 class INTHdr(Packet):
@@ -64,22 +65,29 @@ if __name__ == "__main__":
     bind_layers(Ether, INTHdr, type=0xFFFF)  # INT
 
     args = [x for x in sys.argv if not x.startswith("-")]
-    if len(args) < 7:
+    if len(args) < 7 and len(args)!=3:
         print("Usage: python sender.py <intf> <srcMAC> <srcIP> <dstMAC> <dstIP> <sid1,sid2,...>")
         sys.exit(1)
 
     print("arguments parsed")
     intf = args[1]
-    print("interface :",intf)
-    srcMAC = args[2]
+    if ',' in args[2]:
+        path = args[2]
+        current_node,next_node,path = path.split(',',2)
+        dstIP,dstMAC =lookup(current_node,next_node)
+        srcIP,srcMAC =lookup(next_node,current_node)
+        srv6_sids = path_lookup(next_node,path)
+        srv6_sids = srv6_sids[::-1]
+    else:
+        srcMAC = args[2]
+        srcIP = args[3]
+        dstMAC = args[4]
+        dstIP = args[5]
+        srv6_sids = args[6].split(',')
     print("src MAC :",srcMAC)
-    srcIP = args[3]
     print("src IP :",srcIP)
-    dstMAC = args[4]
     print("dst MAC :",dstMAC)
-    dstIP = args[5]
     print("dst IP :",dstIP)
-    srv6_sids = args[6].split(',')
     print('srv6 SIDs :',srv6_sids)
 
     inth = INTHdr(flag = 1, inst_bitmap=0b0000000100, M=0, hop_count=0)
