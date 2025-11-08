@@ -260,7 +260,7 @@ def main(req):
     # threading.Thread(target=request_issuer,daemon=True).start()
 
 
-def time_probe(req:Request,f=None,g=None,iterations=100,no_scapy = True):
+def time_probe(req:Request,f=None,g=None,iterations=100,no_scapy = False):
     RD = []
     PD = []
     if req.rtype == "path":
@@ -277,9 +277,9 @@ def time_probe(req:Request,f=None,g=None,iterations=100,no_scapy = True):
         arrived = 0
         for i in range(iterations):
             t1 = 0
-            t0 = time.time()
             if no_scapy:s2.send(pkt)
-            else: send_probe_packet(pkt,req.intf,s2,False,f,g)
+            if not no_scapy: send_probe_packet(pkt,req.intf,s2,False,f,g)
+            t0 = time.time()
             t0p = t0 + timeout
             while t1 < t0p:
                 packet, addr = s.recvfrom(65535)
