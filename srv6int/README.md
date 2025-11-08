@@ -287,7 +287,7 @@ On executing, we get this output :
 
 ```
 mininet> h3 python3 mininet/reciever.py &
-mininet> h1 python3 mininet/sender_srv6.py h1-eth0 h1,s1,h3 01111
+mininet> h1 /home/p4/src/p4dev-python-venv/bin/python3 mininet/sender_srv6.py h1-eth0 h1,s1,h3 01111
 arguments parsed
 src MAC : 00:00:00:00:00:10
 src IP : 2001:1:1::1
@@ -302,7 +302,62 @@ Listener thread started. Waiting for INT results on [2001:1:1::1]:9999...
 Sent 1 packets.
 Probe packet sent on interface h1-eth0
 Main script finished.
-mininet> exit
+mininet> h3 /home/p4/src/p4dev-python-venv/bin/python3 mininet/reciever.py &
+mininet> h1 /home/p4/src/p4dev-python-venv/bin/python3 mininet/sender_srv6.py h1-eth0 h1,s1,h3 01111
+arguments parsed
+src MAC : 00:00:00:00:00:10
+src IP : 2001:1:1::1
+dst MAC : 00:00:00:00:00:1a
+dst IP : 2001:1:1::fa
+srv6 SIDs : ['2001:1:3::1']
+INT header : 40078000
+SRv6 stuff : 3b0204010000000020010001000300000000000000000001
+Crafted Packet: 00000000001a000000000010ffff400780006000000000182b4020010001000100000000000000000001200100010001000000000000000000fa3b0204010000000020010001000300000000000000000001
+Listener bound to interface h1-eth0
+Listener thread started. Waiting for INT results on [2001:1:1::1]:9999...
+.
+[Listener] Raw packet received on h1-eth0!
+Raw packet length: 82 bytes
+Packet hex (first 200 chars): 00000000001a000000000010ffff400780006000000000182b4020010001000100000000000000000001200100010001000000000000000000fa3b0204010000000020010001000300000000000000000001
+EtherType: ffff
+Skipping non-IPv6 packet (ethertype: ffff)
+
+Sent 1 packets.
+
+[Listener] Raw packet received on h1-eth0!
+Raw packet length: 160 bytes
+Packet hex (first 200 chars): 00000000001000000000003a86dd020100003e4462ea00003e4467c56000f323005c113f2001000100030000000000000000000120010001000100000000000000000001d740270f005c40775b7b22696e506f72744944223a20312c202265506f727449
+EtherType: 86dd
+Next header: 98 (17=UDP)
+Skipping non-UDP packet (next header: 98)
+
+[Listener] Raw packet received on h1-eth0!
+Raw packet length: 160 bytes
+Packet hex (first 200 chars): 00000000001000000000003a86dd020100003e44634d00003e447400600d43c9005c113f20010001000300000000000000000001200100010001000000000000000000018f62270f005c40775b7b22696e506f72744944223a20312c202265506f727449
+EtherType: 86dd
+Next header: 99 (17=UDP)
+Skipping non-UDP packet (next header: 99)
+
+[Listener] Raw packet received on h1-eth0!
+Raw packet length: 146 bytes
+Packet hex (first 200 chars): 00000000001000000000003a86dd600fde53005c113f2001000100030000000000000000000120010001000100000000000000000001a162270f005c40775b7b22696e506f72744944223a20312c202265506f72744944223a20322c2022696e54696d65
+EtherType: 86dd
+Next header: 17 (17=UDP)
+UDP src_port: 41314, dst_port: 9999, length: 92
+--- Received Telemetry Results ---
+Payload length: 84 bytes
+Payload (raw): b'[{"inPortID": 1, "ePortID": 2, "inTimeStamp": 1044664455, "eTimeStamp": 1044667831}]'
+Payload (decoded): [{"inPortID": 1, "ePortID": 2, "inTimeStamp": 1044664455, "eTimeStamp": 1044667831}]
+Parsed Hop Data:
+  [Hop 1]
+    inPortID : 1
+    ePortID : 2
+    inTimeStamp : 1044664455
+    eTimeStamp : 1044667831
+------------------------------------
+Probe packet sent on interface h1-eth0
+Waiting for response (timeout: 30 seconds)...
+Listener thread exiting.
 ```
 
 The `tmp/received.txt` file will now have something like this :
