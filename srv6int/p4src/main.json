@@ -17,7 +17,6 @@
         ["tmp_9", 8, false],
         ["tmp_10", 8, false],
         ["tmp_11", 9, false],
-        ["cond", 1, false],
         ["local_metadata_t.xconnect", 1, false],
         ["local_metadata_t.next_srv6_sid", 128, false],
         ["local_metadata_t.ua_next_hop", 128, false],
@@ -26,7 +25,7 @@
         ["local_metadata_t.l4_src_port", 16, false],
         ["local_metadata_t.l4_dst_port", 16, false],
         ["local_metadata_t.switch_id", 8, false],
-        ["_padding_0", 2, false]
+        ["_padding_0", 3, false]
       ]
     },
     {
@@ -3943,12 +3942,14 @@
       "runtime_data" : [],
       "primitives" : [
         {
-          "op" : "assign",
+          "op" : "_jump_if_zero",
+          "source_info" : {
+            "filename" : "main.p4",
+            "line" : 80,
+            "column" : 8,
+            "source_fragment" : "if"
+          },
           "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["scalars", "cond"]
-            },
             {
               "type" : "expression",
               "value" : {
@@ -3972,6 +3973,10 @@
                   }
                 }
               }
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x4"
             }
           ]
         },
@@ -3983,37 +3988,16 @@
               "value" : ["ipv6", "dst_addr"]
             },
             {
-              "type" : "expression",
-              "value" : {
-                "type" : "expression",
-                "value" : {
-                  "op" : "?",
-                  "left" : {
-                    "type" : "field",
-                    "value" : ["scalars", "local_metadata_t.next_srv6_sid"]
-                  },
-                  "right" : {
-                    "type" : "field",
-                    "value" : ["ipv6", "dst_addr"]
-                  },
-                  "cond" : {
-                    "type" : "expression",
-                    "value" : {
-                      "op" : ">",
-                      "left" : {
-                        "type" : "field",
-                        "value" : ["srv6h", "segment_left"]
-                      },
-                      "right" : {
-                        "type" : "hexstr",
-                        "value" : "0x00"
-                      }
-                    }
-                  }
-                }
-              }
+              "type" : "field",
+              "value" : ["scalars", "local_metadata_t.next_srv6_sid"]
             }
-          ]
+          ],
+          "source_info" : {
+            "filename" : "main.p4",
+            "line" : 82,
+            "column" : 12,
+            "source_fragment" : "hdr.ipv6.dst_addr = local_metadata.next_srv6_sid"
+          }
         },
         {
           "op" : "assign",
@@ -4027,24 +4011,14 @@
               "value" : {
                 "type" : "expression",
                 "value" : {
-                  "op" : "?",
+                  "op" : "&",
                   "left" : {
                     "type" : "expression",
                     "value" : {
-                      "op" : "&",
+                      "op" : "+",
                       "left" : {
-                        "type" : "expression",
-                        "value" : {
-                          "op" : "+",
-                          "left" : {
-                            "type" : "field",
-                            "value" : ["srv6h", "segment_left"]
-                          },
-                          "right" : {
-                            "type" : "hexstr",
-                            "value" : "0xff"
-                          }
-                        }
+                        "type" : "field",
+                        "value" : ["srv6h", "segment_left"]
                       },
                       "right" : {
                         "type" : "hexstr",
@@ -4053,25 +4027,32 @@
                     }
                   },
                   "right" : {
-                    "type" : "field",
-                    "value" : ["srv6h", "segment_left"]
-                  },
-                  "cond" : {
-                    "type" : "expression",
-                    "value" : {
-                      "op" : ">",
-                      "left" : {
-                        "type" : "field",
-                        "value" : ["srv6h", "segment_left"]
-                      },
-                      "right" : {
-                        "type" : "hexstr",
-                        "value" : "0x00"
-                      }
-                    }
+                    "type" : "hexstr",
+                    "value" : "0xff"
                   }
                 }
               }
+            }
+          ],
+          "source_info" : {
+            "filename" : "main.p4",
+            "line" : 84,
+            "column" : 12,
+            "source_fragment" : "hdr.srv6h.segment_left = hdr.srv6h.segment_left - 1"
+          }
+        },
+        {
+          "op" : "_jump",
+          "source_info" : {
+            "filename" : "main.p4",
+            "line" : 80,
+            "column" : 8,
+            "source_fragment" : "if"
+          },
+          "parameters" : [
+            {
+              "type" : "hexstr",
+              "value" : "0x5"
             }
           ]
         },
@@ -4083,34 +4064,16 @@
               "value" : ["ipv6", "dst_addr"]
             },
             {
-              "type" : "expression",
-              "value" : {
-                "type" : "expression",
-                "value" : {
-                  "op" : "?",
-                  "left" : {
-                    "type" : "field",
-                    "value" : ["scalars", "local_metadata_t.next_srv6_sid"]
-                  },
-                  "right" : {
-                    "type" : "field",
-                    "value" : ["srv6_list[0]", "segment_id"]
-                  },
-                  "cond" : {
-                    "type" : "expression",
-                    "value" : {
-                      "op" : "d2b",
-                      "left" : null,
-                      "right" : {
-                        "type" : "field",
-                        "value" : ["scalars", "cond"]
-                      }
-                    }
-                  }
-                }
-              }
+              "type" : "field",
+              "value" : ["srv6_list[0]", "segment_id"]
             }
-          ]
+          ],
+          "source_info" : {
+            "filename" : "main.p4",
+            "line" : 87,
+            "column" : 12,
+            "source_fragment" : "hdr.ipv6.dst_addr = hdr.srv6_list[0].segment_id"
+          }
         }
       ]
     },
@@ -5473,9 +5436,9 @@
           "direct_meters" : null,
           "action_ids" : [25],
           "actions" : ["main222"],
-          "base_default_next" : "node_5",
+          "base_default_next" : null,
           "next_tables" : {
-            "main222" : "node_5"
+            "main222" : null
           },
           "default_entry" : {
             "action_id" : 25,

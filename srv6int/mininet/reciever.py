@@ -77,8 +77,8 @@ def parse_and_process_probe(pack_bytes, f, g):
         
         D["meta_list"] = pack_bytes[36:36+n*l]
         D["IPv6feilds"] = pack_bytes[36+n*l:36+n*l+16]
-        D["dst_IP_hex"] = pack_bytes[36+n*l+16:36+n*l+32+16]
-        D["src_IP_hex"] = pack_bytes[36+n*l+16+32:36+n*l+64+16]
+        D["src_IP_hex"] = pack_bytes[36+n*l+16:36+n*l+32+16]
+        D["dst_IP_hex"] = pack_bytes[36+n*l+16+32:36+n*l+64+16]
         D["srv6"] = pack_bytes[36+n*l+64+16:]
         
         print("Received INT Probe:", pack_bytes, file=f, flush=True)

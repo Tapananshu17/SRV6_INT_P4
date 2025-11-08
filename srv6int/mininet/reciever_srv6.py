@@ -32,7 +32,7 @@ def send_results_back(destination_ip, port, payload_bytes, log_file):
 def parse_meta_list(meta_list,bitmap_bits,hop_count,nibbles):
     parse_meta_list = []
     for i in range(hop_count):
-        meta = meta_list[i*nibbles,(i+1)*nibbles]
+        meta = meta_list[i*nibbles:(i+1)*nibbles]
         feild_names = ["switchID","inPortID","ePortID","inTimeStamp",
         "eTimeStamp","qDepth","qDelay","proDelay","linkLatency","leftBand",]
         feild_sizes = [8,8,8,48,48,16,24,32,32,32]
@@ -69,7 +69,7 @@ def parse_and_process_probe(pack_bytes, f, g):
         bitmap = ''.join([HEX_TO_BIN[c] for c in inst_bitmap])
         D['bitmap'] = bitmap
         
-        bitmap_bits = (int(c) for c in bitmap[:10])
+        bitmap_bits = [int(c) for c in bitmap[:10]]
         meta_sizes = [8,8,8,48,48,16,24,32,32,32]
         l = sum(x*y for x,y in zip(bitmap_bits,meta_sizes))
         D["metadata bits"] = l
@@ -77,8 +77,8 @@ def parse_and_process_probe(pack_bytes, f, g):
         
         D["meta_list"] = pack_bytes[36:36+n*l]
         D["IPv6feilds"] = pack_bytes[36+n*l:36+n*l+16]
-        D["dst_IP_hex"] = pack_bytes[36+n*l+16:36+n*l+32+16]
-        D["src_IP_hex"] = pack_bytes[36+n*l+16+32:36+n*l+64+16]
+        D["src_IP_hex"] = pack_bytes[36+n*l+16:36+n*l+32+16]
+        D["dst_IP_hex"] = pack_bytes[36+n*l+16+32:36+n*l+64+16]
         D["srv6"] = pack_bytes[36+n*l+64+16:]
         
         print("Received INT probe:", pack_bytes, file=f, flush=True)
@@ -87,17 +87,18 @@ def parse_and_process_probe(pack_bytes, f, g):
         
         meta_list = parse_meta_list(D["meta_list"],bitmap_bits,n,l)
         print("\tParsed meta list:")
-        for metadata in meta_list:print('\t',metadata)
+        for metadata in meta_list:
+            print('\t',metadata)
         # --- Prepare and Send Reply ---
-        
+        print("work1")
         # Convert hex IP string to a usable IPv6 address
         src_ip_addr = socket.inet_ntop(socket.AF_INET6, bytes.fromhex(D["src_IP_hex"]))
-        
-        # Format the payload: hop_count|bitmap|meta_list
-        # payload_str = f"{D['n']}|{D['bitmap']}|{D['meta_list']}"
+        print("works2")
         payload_str = json.dumps(meta_list)
+        print("works3")
         payload_bytes = payload_str.encode()
 
+        print(f"Preparing to send results back to [{src_ip_addr}]:{UDP_RETURN_PORT}")
         send_results_back(src_ip_addr, UDP_RETURN_PORT, payload_bytes, g)
         
     except Exception as e:

@@ -28,7 +28,6 @@ def build_srh(sids):
     return IPv6ExtHdrRouting(bytes(raw))
 
 def send_probe_packet(pkt, intf):
-    """Sends the crafted probe packet."""
     try:
         sendp(pkt, iface=intf)
         print(f"Probe packet sent on interface {intf}")
@@ -36,26 +35,37 @@ def send_probe_packet(pkt, intf):
         print(f"Error sending packet: {e}")
 
 def listen_for_results(listen_ip, port):
-    print(f"Listener thread started. Waiting for INT results on [{listen_ip}]:{port}...")
     s_udp = None
     try:
-        s_udp = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
-        s_udp.bind((listen_ip, port))
-        
-        data, addr = s_udp.recvfrom(2048)
-        
-        print("\n--- Received Telemetry Results ---")
-        print(f"From: {addr[0]}")
-        
-        # Decode the data payload sent by receiver.py
-        payload = data.decode()
-        meta_list = json.loads(payload)
-        for key,value in meta_list.items():
-            print(f"{key} : {value}")
-        print("------------------------------------")
+        s_udp = socket.socket(socket.AF_INET6, socket.SOCK_RAW, socket.IPPROTO_UDP)
+        #s_udp.bind((listen_ip, port))
+        print(f"Listener thread started. Waiting for INT results on [{listen_ip}]:{port}...")
+
+        while True:
+            try:
+                data, addr = s_udp.recvfrom(2048)
+                
+                print(f"\n[Listener] Raw packet received from {addr[0]}! Processing...")
+                print("--- Received Telemetry Results ---")
+                print(f"From: {addr[0]}")
+                
+                payload_bytes = data[48:] 
+                payload_str = payload_bytes.decode()
+                meta_list = json.loads(payload_str)
+                
+                print("Parsed Hop Data:")
+                for i, hop_data in enumerate(meta_list):
+                    print(f"  [Hop {i+1}]")
+                    for key, value in hop_data.items():
+                        print(f"    {key} : {value}")
+                print("------------------------------------")
+            
+            except Exception as e:
+                print(f"\n--- Error processing one packet (will continue): {e} ---")
         
     except Exception as e:
-        print(f"\n--- Error in listener thread: {e} ---")
+        print(f"\n--- CRITICAL Error in listener thread: {e} ---")
+        
     finally:
         if s_udp:
             s_udp.close()
@@ -124,10 +134,13 @@ if __name__ == "__main__":
     # Give the listener a moment to bind
     time.sleep(0.1) 
 
-    # Now send the probe
-    send_probe_packet(pkt, intf)
+    # try:
+    #     while True:
+    #         send_probe_packet(pkt, intf)
+    #         time.sleep(1) 
+    # except KeyboardInterrupt:
+    #     print("\nStopping sender...")
 
-    # Wait for the listener thread to finish, with a timeout
-    # This keeps the main script alive to see the result
-    listener_thread.join(timeout=5.0)
+    send_probe_packet(pkt, intf)
+    listener_thread.join(timeout=30.0)
     print("Main script finished.")

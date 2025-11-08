@@ -2,7 +2,7 @@
     "devices": {
         "device:bmv2:s1": {
             "basic": {
-                "managementAddress": "grpc://10.7.14.115:33265?device_id=1",
+                "managementAddress": "grpc://10.0.2.15:42625?device_id=1",
                 "driver": "bmv2",
                 "pipeconf": "org.onosproject.pipelines.basic"
             },
