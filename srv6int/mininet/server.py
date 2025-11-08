@@ -44,13 +44,14 @@ def build_srh(sids):
     raw[4] = len(sids) - 1 # byte 4 = lastentry
     return IPv6ExtHdrRouting(bytes(raw))
 
-def send_probe_packet(pkt, intf):
+def send_probe_packet(pkt, intf, s:socket.socket=None, log=True, f= None, g= None):
     """Sends the crafted probe packet."""
     try:
-        sendp(pkt, iface=intf)
-        print(f"Probe packet sent on interface {intf}")
+        if s is None: sendp(pkt, iface=intf, verbose=False, socket=s)
+        else: s.send(pkt)
+        if log : print(f"Probe packet sent on interface {intf}", file=f, flush=True)
     except Exception as e:
-        print(f"Error sending packet: {e}")
+        print(f"Error sending packet: {e}", file=g, flush=True)
 
 
 def send_results_back(destination_ip, port, payload_bytes, log_file):
@@ -174,26 +175,24 @@ def parse_request(pack_bytes, f, g) -> (Request|None):
     """
     Given a packet, it will parse it the packet is
     """
-    pass
+    # TODO
 
-def craft_packet(intf:str,path:str,inst_bitmap:str=None) -> Packet:
+def craft_packet(intf:str,path:str,inst_bitmap:str=None,debug=True,f=None) -> Packet:
     default_inst_bitmap = 0b0010000000
     current_node,next_node,path = path.split(',',2)
     dstIP,dstMAC =lookup(current_node,next_node)
-    print(dstIP,dstMAC)
+    if debug:print("Destination IP:",dstIP,"\nDestination MAC",dstMAC,file=f,flush=True)
     srcIP,srcMAC =lookup(next_node,current_node)
-    print(srcMAC,srcIP)
+    if debug:print("Source IP:",srcIP,"\nSource MAC",srcMAC,file=f,flush=True)
     srv6_sids = path_lookup(next_node,path)
     srv6_sids = srv6_sids[::-1]
-    print("srv6_sids:",srv6_sids)
-    if inst_bitmap is not None:
-        inst_bitmap = int(inst_bitmap + "0"*(10-len(inst_bitmap)),2)
+    if debug:print("srv6_sids:",srv6_sids,file=f,flush=True)
+    if inst_bitmap is not None:inst_bitmap = int(inst_bitmap + "0"*(10-len(inst_bitmap)),2)
     else:inst_bitmap = default_inst_bitmap
-
     inth = INTHdr(flag = 1, inst_bitmap=inst_bitmap, M=0, hop_count=0)
-    print("INT header :",bytes(inth).hex())
+    if debug:print("INT header :",bytes(inth).hex(),file=f,flush=True)
     srv6_stuff = build_srh(srv6_sids)
-    print("SRv6 extension header:",bytes(srv6_stuff).hex())
+    if debug:print("SRv6 extension header:",bytes(srv6_stuff).hex(),file=f,flush=True)
     
     pkt = (
         Ether(src=srcMAC, dst=dstMAC) /
@@ -201,7 +200,7 @@ def craft_packet(intf:str,path:str,inst_bitmap:str=None) -> Packet:
         IPv6(src=srcIP, dst=dstIP) /
         srv6_stuff
     )
-    print("Crafted Packet:",bytes(pkt).hex())
+    if debug:print("Crafted Packet:",bytes(pkt).hex(),file=f,flush=True)
 
     return pkt
 
@@ -209,7 +208,7 @@ REQUESTS = queue.Queue()
 ACTIVE_REQUESTS = queue.Queue()
 PROBES = queue.Queue()
 
-def receiver(f=None,g=None):
+def receiver(f=None):
     s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.ntohs(3))
     while True:
         packet, addr = s.recvfrom(65535)
@@ -261,34 +260,69 @@ def main(req):
     # threading.Thread(target=request_issuer,daemon=True).start()
 
 
-def time_probe(req:Request,f=None,g=None,iterations=100):
+def time_probe(req:Request,f=None,g=None,iterations=100,no_scapy = True):
     RD = []
     PD = []
     if req.rtype == "path":
         pkt = craft_packet(req.intf,req.nodes,req.bitmap)
         s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.ntohs(3))
+        if no_scapy:
+            s2 = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.ntohs(3))
+            s2.bind((req.intf,0))
+            pkt = bytes(pkt)
+        else: 
+            s2 = None
+            pkt = bytes(pkt)
+        timeout = 0.1
+        arrived = 0
         for i in range(iterations):
-            send_probe_packet(pkt,req.intf)
+            t1 = 0
             t0 = time.time()
-            while True:
+            if no_scapy:s2.send(pkt)
+            else: send_probe_packet(pkt,req.intf,s2,False,f,g)
+            t0p = t0 + timeout
+            while t1 < t0p:
                 packet, addr = s.recvfrom(65535)
                 if addr[2] == 4 : continue
-                pack_bytes = str(binascii.hexlify(packet))[2:-1]
+                pack_bytes = packet.hex()
                 ethertype = pack_bytes[24:28]
-                # print(f"Received packet with ethertype {ethertype} on {addr[0]}", file=f, flush=True)
-                if ethertype!='ffff':continue
                 t1 = time.time()
+                if ethertype!='ffff':continue
                 path,data = parse_and_process_probe(pack_bytes, debug=False)
                 t2 = time.time()
+                RD.append(t1-t0)
+                PD.append(t2-t1)
+                arrived += 1
                 break
-            RD.append(t1-t0)
-            PD.append(t2-t1)
+            else:
+                RD.append(t1-t0)
+                PD.append(None)
             time.sleep(0.1)
-    from numpy import std,mean
+    from numpy import std,mean,array
     print("Routing delay: mean=",mean(RD),", std=",std(RD))
     print("Processing delay: mean=",mean(PD),", std=",std(PD))
+    print("Packets arrived back:",arrived,'/',iterations,'=',round(100*arrived/iterations),'%')
+    import matplotlib.pyplot as plt
+    plt.hist(1000*array(RD))
+    plt.hist(1000*array(PD))
+    plt.legend(["Routing Delay","Processing Delay"])
+    plt.xlabel("time (ms)")
+    plt.ylabel("frequency")
+    plt.title("INT delay")
+    plt.savefig("mininet/INT_delay.png",format='PNG')
+    print("saved to mininet/INT_delay.png")
 
 if __name__=="__main__":
-    req = Request("h3-eth0",nodes="h3,s1,s2,h3")
-    if "--time" in sys.argv:time_probe(req)
-    else: main(req)
+    timeit = ("--time" in sys.argv)
+    args = [x for x in sys.argv if not (x.startswith('-'))]
+    if any(args[0].startswith(x+str(y)) 
+    for x in 'hcrs' for y in range(10)):
+        args = args[1:]
+    if len(args) == 3:
+        intf,path = args[1:]
+        req = Request(intf,nodes=path)
+        if timeit:time_probe(req)
+        else: main(req)
+    else:print("Wrong arguments",args,
+    "\nUsage: python3 mininet/server.py <interface> <path> [OPTIONS]",
+    "\nExample: h3 python3 mininet/server.py h3-eth0 h3,s1,s2,h3 --time")
