@@ -297,22 +297,6 @@ srv6 SIDs : ['2001:1:3::1']
 INT header : 40078000
 SRv6 stuff : 3b0204010000000020010001000300000000000000000001
 Crafted Packet: 00000000001a000000000010ffff400780006000000000182b4020010001000100000000000000000001200100010001000000000000000000fa3b0204010000000020010001000300000000000000000001
-Listener thread started. Waiting for INT results on [2001:1:1::1]:9999...
-.
-Sent 1 packets.
-Probe packet sent on interface h1-eth0
-Main script finished.
-mininet> h3 /home/p4/src/p4dev-python-venv/bin/python3 mininet/reciever.py &
-mininet> h1 /home/p4/src/p4dev-python-venv/bin/python3 mininet/sender_srv6.py h1-eth0 h1,s1,h3 01111
-arguments parsed
-src MAC : 00:00:00:00:00:10
-src IP : 2001:1:1::1
-dst MAC : 00:00:00:00:00:1a
-dst IP : 2001:1:1::fa
-srv6 SIDs : ['2001:1:3::1']
-INT header : 40078000
-SRv6 stuff : 3b0204010000000020010001000300000000000000000001
-Crafted Packet: 00000000001a000000000010ffff400780006000000000182b4020010001000100000000000000000001200100010001000000000000000000fa3b0204010000000020010001000300000000000000000001
 Listener bound to interface h1-eth0
 Listener thread started. Waiting for INT results on [2001:1:1::1]:9999...
 .
