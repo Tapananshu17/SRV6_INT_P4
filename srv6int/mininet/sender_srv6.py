@@ -1,4 +1,4 @@
-import socket, sys, time, threading
+import socket, sys, time, threading, binascii
 from scapy.all import *
 from scapy.layers.inet6 import IPv6ExtHdrRouting
 import json
@@ -15,7 +15,6 @@ class INTHdr(Packet):
         BitField("reserved", 0, 10)
     ]
 
-# Define UDP port for results
 UDP_RETURN_PORT = 9999
 
 def build_srh(sids):
@@ -24,7 +23,7 @@ def build_srh(sids):
         addresses=sids
     )
     raw = bytearray(bytes(srh))
-    raw[4] = len(sids) - 1 # byte 4 = lastentry
+    raw[4] = len(sids) - 1 
     return IPv6ExtHdrRouting(bytes(raw))
 
 def send_probe_packet(pkt, intf):
@@ -34,23 +33,81 @@ def send_probe_packet(pkt, intf):
     except Exception as e:
         print(f"Error sending packet: {e}")
 
-def listen_for_results(listen_ip, port):
+def listen_for_results(listen_ip, port, interface):
     s_udp = None
     try:
-        s_udp = socket.socket(socket.AF_INET6, socket.SOCK_RAW, socket.IPPROTO_UDP)
-        #s_udp.bind((listen_ip, port))
+        # Use AF_PACKET to get Ethernet headers (like receiver does)
+        s_udp = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.ntohs(3))
+        # Bind to specific interface
+        s_udp.bind((interface, 0))
+        print(f"Listener bound to interface {interface}")
         print(f"Listener thread started. Waiting for INT results on [{listen_ip}]:{port}...")
 
         while True:
             try:
                 data, addr = s_udp.recvfrom(2048)
                 
-                print(f"\n[Listener] Raw packet received from {addr[0]}! Processing...")
-                print("--- Received Telemetry Results ---")
-                print(f"From: {addr[0]}")
+                # Convert to hex for easier parsing
+                pack_bytes = binascii.hexlify(data).decode('ascii')
                 
-                payload_bytes = data[48:] 
-                payload_str = payload_bytes.decode()
+                print(f"\n[Listener] Raw packet received on {addr[0]}!")
+                print(f"Raw packet length: {len(data)} bytes")
+                print(f"Packet hex (first 200 chars): {pack_bytes[:200]}")
+                
+                # Ethernet header: 14 bytes (28 hex chars)
+                # Check EtherType (bytes 12-14, hex chars 24-28)
+                ethertype = pack_bytes[24:28]
+                print(f"EtherType: {ethertype}")
+                
+                # 86dd = IPv6
+                if ethertype != '86dd':
+                    print(f"Skipping non-IPv6 packet (ethertype: {ethertype})")
+                    continue
+                
+                # IPv6 header starts at byte 14 (hex char 28), is 40 bytes (80 hex chars)
+                ipv6_header_start = 28
+                
+                # Get next header field (byte 6 of IPv6 header = hex chars 40-42)
+                next_header = pack_bytes[ipv6_header_start + 12:ipv6_header_start + 14]
+                next_header_int = int(next_header, 16)
+                print(f"Next header: {next_header_int} (17=UDP)")
+                
+                # UDP = 17 (0x11)
+                if next_header_int != 17:
+                    print(f"Skipping non-UDP packet (next header: {next_header_int})")
+                    continue
+                
+                # UDP header starts after Ethernet (28) + IPv6 (80) = 108 hex chars
+                udp_start = ipv6_header_start + 80
+                udp_header = pack_bytes[udp_start:udp_start + 16]  # 8 bytes = 16 hex chars
+                
+                # Parse UDP header
+                src_port = int(udp_header[0:4], 16)
+                dst_port = int(udp_header[4:8], 16)
+                udp_length = int(udp_header[8:12], 16)
+                
+                print(f"UDP src_port: {src_port}, dst_port: {dst_port}, length: {udp_length}")
+                
+                # Verify it's for our port
+                if dst_port != port:
+                    print(f"Skipping packet - wrong destination port (expected {port}, got {dst_port})")
+                    continue
+                
+                # Payload starts after Ethernet (28) + IPv6 (80) + UDP (16) = 124 hex chars
+                payload_start = udp_start + 16
+                payload_hex = pack_bytes[payload_start:]
+                
+                # Convert hex payload to bytes
+                payload_bytes = bytes.fromhex(payload_hex)
+                
+                print("--- Received Telemetry Results ---")
+                print(f"Payload length: {len(payload_bytes)} bytes")
+                print(f"Payload (raw): {payload_bytes}")
+                
+                # Decode JSON payload
+                payload_str = payload_bytes.decode('utf-8')
+                print(f"Payload (decoded): {payload_str}")
+                
                 meta_list = json.loads(payload_str)
                 
                 print("Parsed Hop Data:")
@@ -59,12 +116,25 @@ def listen_for_results(listen_ip, port):
                     for key, value in hop_data.items():
                         print(f"    {key} : {value}")
                 print("------------------------------------")
+                
+                # Exit after receiving one result
+                break
             
+            except json.JSONDecodeError as je:
+                print(f"\n--- JSON decode error: {je} ---")
+                print(f"Payload string was: {payload_bytes[:200]}")
+            except UnicodeDecodeError as ue:
+                print(f"\n--- Unicode decode error: {ue} ---")
+                print(f"Raw payload bytes (first 100): {payload_bytes[:100].hex()}")
             except Exception as e:
                 print(f"\n--- Error processing one packet (will continue): {e} ---")
+                import traceback
+                traceback.print_exc()
         
     except Exception as e:
         print(f"\n--- CRITICAL Error in listener thread: {e} ---")
+        import traceback
+        traceback.print_exc()
         
     finally:
         if s_udp:
@@ -123,24 +193,22 @@ if __name__ == "__main__":
     print("Crafted Packet:",bytes(pkt).hex())
 
     # Start the listener thread first
-    # daemon=True ensures thread exits when main script exits
     listener_thread = threading.Thread(
         target=listen_for_results, 
-        args=(srcIP, UDP_RETURN_PORT), 
+        args=(srcIP, UDP_RETURN_PORT, intf), 
         daemon=True
     )
     listener_thread.start()
 
     # Give the listener a moment to bind
-    time.sleep(0.1) 
-
-    # try:
-    #     while True:
-    #         send_probe_packet(pkt, intf)
-    #         time.sleep(1) 
-    # except KeyboardInterrupt:
-    #     print("\nStopping sender...")
+    time.sleep(0.5) 
 
     send_probe_packet(pkt, intf)
+    
+    print("Waiting for response (timeout: 30 seconds)...")
     listener_thread.join(timeout=30.0)
+    
+    if listener_thread.is_alive():
+        print("Timeout: No response received within 30 seconds")
+    
     print("Main script finished.")
