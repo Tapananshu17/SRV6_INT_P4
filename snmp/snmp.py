@@ -15,7 +15,6 @@ class Router(Host):
         super().terminate()
 
 def configure_snmp(router):
-    router.cmd("pkill snmpd")
     router.cmd("/usr/sbin/snmpd -f -Lo -c /etc/snmp/snmpd.conf &")
 
 
