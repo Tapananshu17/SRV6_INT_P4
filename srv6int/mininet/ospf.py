@@ -12,8 +12,7 @@ for router, info in data.items():
             G.add_edge(router, neighbor, ip=meta[0], mac=meta[1], port=meta[2])
 
 # --- Infer OSPF next hops ---
-switches = [s for s in data.keys() if s.startswith('s') or s.startswith('r')]
-for src in switches:
+for src in data.keys():
     paths = nx.single_source_dijkstra_path(G, src)
     out_infered = {}
     for dst, path in paths.items():
