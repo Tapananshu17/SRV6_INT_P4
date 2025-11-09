@@ -110,7 +110,7 @@ def set_from_file(sh,mapping_file):
         if s.startswith('h'):continue
         switch_id = int(s[1:])
         connect_to_router(s)
-        set_switch_id(sh,str(switch_id))
+        # set_switch_id(sh,str(switch_id)) # TODO: figure out why this doesn't work in newer versions
         if "out_infered" in Flow[s]:entries = Flow[s]["out_infered"]
         else:entries = Flow[s]["out"] 
         for s2,L in entries.items():

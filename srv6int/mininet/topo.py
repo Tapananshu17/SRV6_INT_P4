@@ -137,7 +137,7 @@ def TwoRoutersThreeHosts(cli=False,only_cli=False):
     net.stop()
 
 
-def custom_topo(file,mapping_file=None,cli=False,only_cli=False,vis=True):
+def custom_topo(file,mapping_file=None,cli=False,only_cli=False,vis=True,script="mininet/mininet_script.txt"):
     with open(file,'r') as f:edges = f.read()
     edges = edges.split('\n')
     edges = [edge.split(',') for edge in edges[1:] if edge]
@@ -225,11 +225,9 @@ def custom_topo(file,mapping_file=None,cli=False,only_cli=False,vis=True):
         Flow = {}
         for node in nodes:
             Flow[node] = {
-                # "out":{x[0]:[y + [str(i+1)] for y in x[1]] for i,x in enumerate(Out_Adds[s].items())},
                 "out":Out_Adds[node],
                 "in":Addresses[node]
                 }
-        # Out_Adds = {s:ads for s,ads in Out_Adds.items() if s in switches}
         with open(mapping_file,'w') as mf:
             json.dump(Flow,mf,indent=4)
 
@@ -237,7 +235,7 @@ def custom_topo(file,mapping_file=None,cli=False,only_cli=False,vis=True):
 
     net.start()
     if only_cli:CLI(net)
-    else:CLI(net,script="mininet/mininet_script.txt")
+    else:CLI(net,script=script)
     if cli:CLI(net)
     net.stop()
 
@@ -245,4 +243,10 @@ if __name__=="__main__":
     import sys
     cli = ("--cli" in sys.argv)
     only_cli = ("--only_cli" in sys.argv)
-    custom_topo("mininet/interfaces.csv","mininet/flow.json",cli,only_cli)
+    vis = ('--no_vis' not in sys.argv)
+    args = [x for x in sys.argv if not x.startswith('-')]
+    if len(args) == 1: 
+        custom_topo("mininet/interfaces.csv","mininet/flow.json",cli,only_cli,vis)
+    else: 
+        script = args[1]
+        custom_topo("mininet/interfaces.csv","mininet/flow.json",cli,only_cli,vis,script)

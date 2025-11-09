@@ -1,0 +1,6 @@
+c0 python3 mininet/ospf.py
+c0 python3 mininet/set_flow_tables.py 1> /dev/null 2> /dev/null
+h3 echo "h3: server starting.."
+h3 python3 mininet/reciever.py &
+h1 echo "h1: crafting and sending probe.."
+h1 python3 mininet/sender.py h1-eth0 h1,s1,s2,h3 01111

@@ -2,9 +2,9 @@ Socket ready
 Received packet with ethertype 86dd on h3-eth1
 Received packet with ethertype 86dd on h3-eth0
 Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth1
 Received packet with ethertype 86dd on h3-eth0
+Received packet with ethertype 86dd on h3-eth1
+Received packet with ethertype 86dd on h3-eth1
 Received packet with ethertype 86dd on h3-eth0
 Received packet with ethertype ffff on h3-eth1
 Processing INT probe packet...
@@ -12,14 +12,14 @@ Converting source IP...
 Source IP hex: 20010001000100000000000000000001
 Source IP address: 2001:1:1::1
 JSON payload created: 156 bytes
-JSON preview: [{"inPortID": 1, "ePortID": 3, "inTimeStamp": 4655548, "eTimeStamp": 4661475}, {"inPortID": 3, "ePortID": 2, "inTimeStamp": 4830590, "eTimeStamp": 4839938}]
+JSON preview: [{"inPortID": 1, "ePortID": 3, "inTimeStamp": 5437178, "eTimeStamp": 5439812}, {"inPortID": 3, "ePortID": 2, "inTimeStamp": 5333692, "eTimeStamp": 5336968}]
 Preparing to send results back to [2001:1:1::1]:9999
 Sent metadata results to [2001:1:1::1]:9999
 Payload size: 156 bytes
-Payload preview: b'[{"inPortID": 1, "ePortID": 3, "inTimeStamp": 4655548, "eTimeStamp": 4661475}, {"inPortID": 3, "ePor'
+Payload preview: b'[{"inPortID": 1, "ePortID": 3, "inTimeStamp": 5437178, "eTimeStamp": 5439812}, {"inPortID": 3, "ePor'
 Received packet with ethertype 86dd on h3-eth0
 Received packet with ethertype 86dd on h3-eth0
 Received packet with ethertype 86dd on h3-eth0
 Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth0
+Received packet with ethertype 86dd on h3-eth1
+Received packet with ethertype 86dd on h3-eth1
