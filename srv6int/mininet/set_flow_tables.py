@@ -106,7 +106,8 @@ def set_IPv6(dst_ipv6,dst_mac,out_port,switch_name=None,only_IP=False):
 
 def set_from_file(sh,mapping_file):
     with open(mapping_file,'r') as mf:Flow = json.load(mf)
-    for s in Flow:
+    switches = [s for s in Flow.keys() if s.startswith('s') or s.startswith('r')]
+    for s in switches:
         if s.startswith('h'):continue
         switch_id = int(s[1:])
         connect_to_router(s)
