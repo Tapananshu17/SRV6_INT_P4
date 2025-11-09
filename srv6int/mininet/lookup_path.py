@@ -1,3 +1,5 @@
+import json
+with open('mininet/flow.json','r') as f:Flow = json.load(f)
 with open('mininet/interfaces.csv','r') as f:edges = f.read()
 edges = edges.split('\n')[1:]
 edges = [edge.split(',') for edge in edges if edge.strip()]
@@ -13,15 +15,17 @@ for x,y in edges.items():
     rev_lookup[(A,IP_B)] = B
 
 def lookup(current_node,next_node):
-    global edges,nodes
+    global Flow
     A = current_node
     if not A in nodes: return None
     B = next_node
-    if (A,B) in edges:
-        IP_A,MAC_A,IP_B,MAC_B = edges[(A,B)]
-    elif (B,A) in edges:
-        IP_B,MAC_B,IP_A,MAC_A = edges[(B,A)]
-    else: return None
+    out = Flow[A]
+    if "out_infered" in out: out = out["out_infered"]
+    else: out = out['out']
+    if B not in out: return None
+    if not out[B]: return None
+    IP_B,MAC_B,port_B = out[B][0]
+    IP_B = IP_B.split('/')[0]
     return IP_B,MAC_B
 
 def path_lookup(current_node,path,f=None):
