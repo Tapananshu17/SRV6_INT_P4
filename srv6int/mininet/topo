@@ -11,9 +11,9 @@ IP_g:2001:1:2::fb"]
 IP:2001:1:3::1/64
 MAC:00:00:00:00:00:30
 IP_g:2001:1:3::fa"]
-	s1 -- h1
-	s1 -- h3
-	s2 -- h2
-	s2 -- h3
-	s1 -- s2
+	s1 -- h1 [label="R = 10 Mbps"]
+	s1 -- h3 [label="R = 10 Mbps"]
+	s2 -- h2 [label="R = 5 Mbps"]
+	s2 -- h3 [label="R = 5 Mbps"]
+	s1 -- s2 [label="R = 5 Mbps"]
 }

@@ -5,6 +5,7 @@ from mininet.log import setLogLevel
 from mininet.net import Mininet
 from mininet.node import RemoteController
 from mininet.topo import Topo
+from mininet.link import TCLink
 
 from bmv2_cleaned import ONOSBmv2Switch
 from host6 import IPv6Host
@@ -152,13 +153,13 @@ def custom_topo(file,mapping_file=None,cli=False,only_cli=False,vis=True,script=
     counter = {node:0 for node in nodes}
     if vis:G = graphviz.Graph()
     for edge in edges:
-        A,B,IP_A,MAC_A,IP_B,MAC_B = edge
+        A,B,IP_A,MAC_A,IP_B,MAC_B,R,D = edge
         if A.startswith('h') and B == '':
             Host_Addresses[A] = [IP_A,MAC_A,IP_B]
             if vis: G.node(A,f"{A}\nIP:{IP_A}\nMAC:{MAC_A}\nIP_g:{IP_B}")
             continue
 
-        assert all(x!='' for x in edge)
+        assert all(x!='' for x in edge[:-2])
         
         counter[A]+=1
         counter[B]+=1
@@ -179,7 +180,11 @@ def custom_topo(file,mapping_file=None,cli=False,only_cli=False,vis=True,script=
         elif B not in Out_Adds[A]:Out_Adds[A][B] = [[IP_B,MAC_B,port_A]]
         else: Out_Adds[A][B].append([IP_B,MAC_B,port_A])
 
-        if vis:G.edge(A,B)
+        if vis:
+            if R!='':R = f"R = {R} Mbps"
+            if D!="":D = f"D = {D} us"
+            label = R + D
+            G.edge(A,B,label)
 
 
     print("\nHost config")
@@ -209,10 +214,13 @@ def custom_topo(file,mapping_file=None,cli=False,only_cli=False,vis=True,script=
 
     Done = []
 
-    for A,B,IP_A,MAC_A,IP_B,MAC_B in edges:
+    for A,B,IP_A,MAC_A,IP_B,MAC_B,R,D in edges:
         if (A,B) in Done: continue
         if (B,A) in Done: continue
-        net.addLink(Nodes[A],Nodes[B])
+        if R and D : net.addLink(Nodes[A],Nodes[B],cls=TCLink, bw=float(R), delay=f"{D}ms")
+        elif R : net.addLink(Nodes[A],Nodes[B],cls=TCLink, bw=float(R))
+        elif D : net.addLink(Nodes[A],Nodes[B],cls=TCLink, delay=f"{D}us")
+        else: net.addLink(Nodes[A],Nodes[B])
         Done.append((A,B))
 
     for s in switches:

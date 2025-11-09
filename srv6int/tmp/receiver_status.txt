@@ -1,92 +1,18 @@
-Socket ready
-Received packet with ethertype ffff on h3-eth1
-Processing INT probe packet...
-Converting source IP...
-Source IP hex: 20010001000100000000000000000001
-Source IP address: 2001:1:1::1
-JSON payload created: 160 bytes
-JSON preview: [{"inPortID": 1, "ePortID": 3, "inTimeStamp": 45302606, "eTimeStamp": 45304943}, {"inPortID": 3, "ePortID": 2, "inTimeStamp": 45081667, "eTimeStamp": 45083941}]
-Preparing to send results back to [2001:1:1::1]:9999
-Sent metadata results to [2001:1:1::1]:9999
-Payload size: 160 bytes
-Payload preview: b'[{"inPortID": 1, "ePortID": 3, "inTimeStamp": 45302606, "eTimeStamp": 45304943}, {"inPortID": 3, "eP'
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype ffff on h3-eth0
-Processing INT probe packet...
-Converting source IP...
-Source IP hex: 20010001000100000000000000000001
-Source IP address: 2001:1:1::1
-JSON payload created: 80 bytes
-JSON preview: [{"inPortID": 1, "ePortID": 2, "inTimeStamp": 56409838, "eTimeStamp": 56412075}]
-Preparing to send results back to [2001:1:1::1]:9999
-Sent metadata results to [2001:1:1::1]:9999
-Payload size: 80 bytes
-Payload preview: b'[{"inPortID": 1, "ePortID": 2, "inTimeStamp": 56409838, "eTimeStamp": 56412075}]'
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype ffff on h3-eth0
-Processing INT probe packet...
-Converting source IP...
-Source IP hex: 20010001000100000000000000000001
-Source IP address: 2001:1:1::1
-JSON payload created: 80 bytes
-JSON preview: [{"inPortID": 1, "ePortID": 2, "inTimeStamp": 73252457, "eTimeStamp": 73254388}]
-Preparing to send results back to [2001:1:1::1]:9999
-Sent metadata results to [2001:1:1::1]:9999
-Payload size: 80 bytes
-Payload preview: b'[{"inPortID": 1, "ePortID": 2, "inTimeStamp": 73252457, "eTimeStamp": 73254388}]'
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype ffff on h3-eth0
-Processing INT probe packet...
-Converting source IP...
-Source IP hex: 20010001000100000000000000000001
-Source IP address: 2001:1:1::1
-JSON payload created: 80 bytes
-JSON preview: [{"inPortID": 1, "ePortID": 2, "inTimeStamp": 96747544, "eTimeStamp": 96749311}]
-Preparing to send results back to [2001:1:1::1]:9999
-Sent metadata results to [2001:1:1::1]:9999
-Payload size: 80 bytes
-Payload preview: b'[{"inPortID": 1, "ePortID": 2, "inTimeStamp": 96747544, "eTimeStamp": 96749311}]'
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype ffff on h3-eth1
-Processing INT probe packet...
-Converting source IP...
-Source IP hex: 20010001000100000000000000000001
-Source IP address: 2001:1:1::1
-JSON payload created: 164 bytes
-JSON preview: [{"inPortID": 1, "ePortID": 3, "inTimeStamp": 124484508, "eTimeStamp": 124486290}, {"inPortID": 3, "ePortID": 2, "inTimeStamp": 124262753, "eTimeStamp": 124265274}]
-Preparing to send results back to [2001:1:1::1]:9999
-Sent metadata results to [2001:1:1::1]:9999
-Payload size: 164 bytes
-Payload preview: b'[{"inPortID": 1, "ePortID": 3, "inTimeStamp": 124484508, "eTimeStamp": 124486290}, {"inPortID": 3, "'
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth1
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth0
-Received packet with ethertype 86dd on h3-eth0
+557420.457414955 0
+557421.692414772 1000
+557422.861959381 2000
+557423.709045264 3000
+557424.543199916 4000
+557426.257927641 5000
+557427.414173438 6000
+557428.390440234 7000
+557429.387845631 8000
+557430.478140058 9000
+557431.511429461 10000
+557432.456814486 11000
+557433.415013543 12000
+557434.787093403 13000
+557435.780821801 14000
+557436.758870851 15000
+557437.792289046 16000
+557438.759086275 17000

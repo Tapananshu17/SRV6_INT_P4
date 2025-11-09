@@ -10,15 +10,19 @@ nodes = list(set(nodes))
 rev_lookup = {}
 for x,y in edges.items():
     A,B = x
-    IP_A,MAC_A,IP_B,MAC_B = y
+    IP_A,MAC_A,IP_B,MAC_B,R,D = y
     rev_lookup[(B,IP_A)] = A
     rev_lookup[(A,IP_B)] = B
 
+def clean_name(A:str):
+    if A.startswith('"') or A.startswith("'"): A = A[1:-1]
+    return A
+
 def lookup(current_node,next_node):
     global Flow
-    A = current_node
+    A = clean_name(current_node)
     if not A in nodes: return None
-    B = next_node
+    B = clean_name(next_node)
     out = Flow[A]
     if "out_infered" in out: out = out["out_infered"]
     else: out = out['out']
@@ -29,6 +33,8 @@ def lookup(current_node,next_node):
     return IP_B,MAC_B
 
 def path_lookup(current_node,path,f=None):
+    current_node = clean_name(current_node)
+    if "," not in path: path = clean_name(path)
     SIDs = []
     if isinstance(path,str):path = [x.strip() for x in path.split(',')]
     for node in path:
