@@ -158,7 +158,7 @@ class Request:
         self.sending = True
         while self.sending:
             send_probe_packet(self.probe,self.intf)
-            time.sleep(1)
+            time.sleep(0.01)
     def fulfill(self,f=None,g=None):
         if self.rtype == "path":
             self.craft_probe()
@@ -232,13 +232,11 @@ def probe_parser(f=None,g=None):
         try: 
             probe = PROBES.get(timeout=0.1)
             path,data = parse_and_process_probe(probe,debug=False)
-            print(path)
-            print(data)
+            print(path,data,sep=',',file=f,flush=True)
             if path not in DATA:DATA[path] = queue.Queue()
             DATA[path].put(data)
         except Exception as e:pass
-            # print(e)
-        time.sleep(0.1)
+        time.sleep(0.01)
 
 def request_issuer(f=None,g=None):
     global REQUESTS
@@ -253,33 +251,29 @@ def request_issuer(f=None,g=None):
         time.sleep(1)
 
 
-def main(req):
+def main(req,data_file=None):
+    if data_file is not None: data_file = open(data_file,'w')
     threading.Thread(target=receiver,daemon=True).start()
-    threading.Thread(target=probe_parser,daemon=True).start()
+    threading.Thread(target=probe_parser,args=(data_file,),daemon=True).start()
     req.fulfill()
     # threading.Thread(target=request_issuer,daemon=True).start()
 
 
-def time_probe(req:Request,f=None,g=None,iterations=100,no_scapy = False):
+def time_probe(req:Request,f=None,g=None,iterations=5000):
     RD = []
     PD = []
     if req.rtype == "path":
-        pkt = craft_packet(req.intf,req.nodes,req.bitmap)
+        pkt = craft_packet(req.intf,req.nodes,req.bitmap,False)
         s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.ntohs(3))
-        if no_scapy:
-            s2 = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.ntohs(3))
-            s2.bind((req.intf,0))
-            pkt = bytes(pkt)
-        else: 
-            s2 = None
-            pkt = bytes(pkt)
+        s2 = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.ntohs(3))
+        s2.bind((req.intf,0))
+        pkt = bytes(pkt)
         timeout = 0.1
         arrived = 0
         for i in range(iterations):
             t1 = 0
-            if no_scapy:s2.send(pkt)
-            if not no_scapy: send_probe_packet(pkt,req.intf,s2,False,f,g)
             t0 = time.time()
+            s2.send(pkt)
             t0p = t0 + timeout
             while t1 < t0p:
                 packet, addr = s.recvfrom(65535)
@@ -297,15 +291,14 @@ def time_probe(req:Request,f=None,g=None,iterations=100,no_scapy = False):
             else:
                 RD.append(t1-t0)
                 PD.append(None)
-            time.sleep(0.1)
     from numpy import std,mean,array
-    print("Routing delay: mean=",mean(RD),", std=",std(RD))
+    print("Probe end-to-end delay: mean=",mean(RD),", std=",std(RD))
     print("Processing delay: mean=",mean(PD),", std=",std(PD))
     print("Packets arrived back:",arrived,'/',iterations,'=',round(100*arrived/iterations),'%')
     import matplotlib.pyplot as plt
     plt.hist(1000*array(RD))
     plt.hist(1000*array(PD))
-    plt.legend(["Routing Delay","Processing Delay"])
+    plt.legend(["Probe end-to-end Delay","Processing Delay"])
     plt.xlabel("time (ms)")
     plt.ylabel("frequency")
     plt.title("INT delay")
@@ -318,11 +311,12 @@ if __name__=="__main__":
     if any(args[0].startswith(x+str(y)) 
     for x in 'hcrs' for y in range(10)):
         args = args[1:]
-    if len(args) == 3:
-        intf,path = args[1:]
-        req = Request(intf,nodes=path)
+    if len(args) >= 3:
+        intf,path = args[1],args[2]
+        if len(args) == 4:req = Request(intf,nodes=path, meta_types=args[3])
+        else: req = Request(intf,nodes=path)
         if timeit:time_probe(req)
-        else: main(req)
+        else: main(req,'mininet/parsed_probes.txt')
     else:print("Wrong arguments",args,
     "\nUsage: python3 mininet/server.py <interface> <path> [OPTIONS]",
     "\nExample: h3 python3 mininet/server.py h3-eth0 h3,s1,s2,h3 --time")

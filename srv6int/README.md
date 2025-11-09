@@ -104,6 +104,35 @@ This is the entry point. This program creates the Mininet topology and runs the 
 
 This also creates a visualisation for the topology using `graphviz`. The `dot` code is stored in `topo` (no extension) and the image is written to `topo.png`.
 
+
+#### `topologies/`
+
+This sub-directory contains more files like `interfaces.csv`, each implementing a different topology. To use these topologies, simply copy the contents to `interfaces.csv`. For example:
+
+```
+cp topologies/interfaces_M.csv interfaces.csv
+```
+
+#### `server.py`
+
+This starts an active INT server similar to one described in the SFANT system.
+This server first crafts an empty INT probe that is routed using SRv6 to go through some desired path and come back, and then periodically sends it in intervals of 10 ms.
+
+For example, on running `h3 python3 mininet/server.py h3-eth0 h3,s1,s2,h3 01111`, you will get a deluge of logs of this kind : 
+
+```
+Probe packet sent on interface h3-eth0
+Probe packet sent on interface h3-eth0
+Received packet with ethertype ffff on h3-eth1
+Probe packet sent on interface h3-eth0
+Received packet with ethertype ffff on h3-eth1
+Received packet with ethertype ffff on h3-eth1
+Probe packet sent on interface h3-eth0
+Received packet with ethertype ffff on h3-eth1
+```
+
+And there will be a file called `parsed_probes.txt` that will contain the bytes for the SRv6 segment list (hex) and the telemetry data that the filled probes came with.
+
 ## Example Execution
 
 ### Compiling
@@ -225,7 +254,7 @@ PING 2001:1:2::2(2001:1:2::2) 56 data bytes
 rtt min/avg/max/mdev = 2.791/4.062/5.303/0.868 ms
 ```
 
-### Server and client
+### Receiver and Sender
 
 You can set a receiver process on `h3` so that it will parse INT probes as :
 
@@ -361,3 +390,25 @@ Received INT probe: 0000000000310000000000abffff40278000010300000049836700000049
 	 {'inPortID': 1, 'ePortID': 3, 'inTimeStamp': 4817767, 'eTimeStamp': 4820521}
 	 {'inPortID': 3, 'ePortID': 2, 'inTimeStamp': 4435464, 'eTimeStamp': 4440049}
 ```
+
+#### Quality of real-time measurements
+
+The main incentive to use INT is that it can make continuously measure in real-time with no overhead on the telemetry application and routing processor caused due to a management plane protocol such as SNMP. 
+To get a measure of how "real-time" these measurements are, we can run the `server.py` script with the `--time` option. Without the `--time` option, it starts an active INT server, similar to the SFANT system. With the option, it additionaly times this process at various 2 stages: the probe end-to-end delay, and the processing time (for parsing the probe). The time for crafting the probe is not included since that is done only once when a telemetry request arrives; after that the same packet is re-sent periodically.
+We can run the script like this : 
+
+```
+mininet> h3 python3 mininet/server.py h3-eth0 h3,s1,s2,h3 --time
+Probe end-to-end delay: mean= 0.0026116061210632326 , std= 0.0006598378759099222
+Processing delay: mean= 3.0332517623901366e-05 , std= 1.1348508267689347e-05
+Packets arrived back: 5000 / 5000 = 100 %
+saved to mininet/INT_delay.png
+```
+
+The values in the output are in seconds. Thus, the mean "routing delay" is around 3 ms. This is the time elapsed from when a packet is sent to when it is received back. 
+The script also created this histogram:
+
+![INT delay](mininet/INT_delay.png)
+
+Compared to this, the interval at which telemetry data is polled in a traditional SNMP based Network Telemetry system is in seconds to half a minute.
+
