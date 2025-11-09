@@ -107,7 +107,7 @@ class ONOSBmv2Switch(Switch):
                  elogger=False, grpcport=None, cpuport=255, notifications=False,
                  thriftport=None, netcfg=False, dryrun=False,
                  pipeconf=DEFAULT_PIPECONF, pktdump=False, valgrind=False,
-                 gnmi=False, portcfg=True, onosdevid=None, stratum=False, ## kept for API compatibility, ignored
+                 gnmi=False, portcfg=False, onosdevid=None, stratum=False, ## kept for API compatibility, ignored
                  ipv6_addresses:list[str]=None,
                  **kwargs):
         Switch.__init__(self, name, **kwargs)
@@ -255,7 +255,7 @@ class ONOSBmv2Switch(Switch):
         except urllib3.URLError as e:
             warn("*** WARN: unable to push config to ONOS (%s)\n" % e.reason)
 
-    def AddIPv6Addrs(self, **kwargs):
+    def AddIPv6Addrs(self, debug=False,**kwargs):
         
         self.cmd('sysctl -w net.ipv6.conf.all.forwarding=0')
 
@@ -268,11 +268,10 @@ class ONOSBmv2Switch(Switch):
                     
                     if isinstance(ipv6,list): ipv6,mac = ipv6
                     else: mac = None
-                    print(ipv6,mac)
                     if mac is not None:self.intf(intf_name).setMAC(mac)
                     
                     self.cmd(f'ip -6 addr add {ipv6} dev {intf_name}') 
-                    print(f"Assigned {ipv6} to {self.name}:{intf_name}")
+                    if debug:print(f"Assigned {ipv6} to {self.name}:{intf_name}")
 
     def start(self, controllers=None):
         """

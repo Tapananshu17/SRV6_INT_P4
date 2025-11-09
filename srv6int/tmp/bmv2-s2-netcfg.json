@@ -2,35 +2,9 @@
     "devices": {
         "device:bmv2:s2": {
             "basic": {
-                "managementAddress": "grpc://10.0.2.15:57039?device_id=1",
+                "managementAddress": "grpc://10.7.14.115:48201?device_id=1",
                 "driver": "bmv2",
                 "pipeconf": "org.onosproject.pipelines.basic"
-            },
-            "ports": {
-                "1": {
-                    "number": 1,
-                    "name": "s2-eth1",
-                    "enabled": true,
-                    "removed": false,
-                    "type": "copper",
-                    "speed": 10000
-                },
-                "2": {
-                    "number": 2,
-                    "name": "s2-eth2",
-                    "enabled": true,
-                    "removed": false,
-                    "type": "copper",
-                    "speed": 10000
-                },
-                "3": {
-                    "number": 3,
-                    "name": "s2-eth3",
-                    "enabled": true,
-                    "removed": false,
-                    "type": "copper",
-                    "speed": 10000
-                }
             }
         }
     }

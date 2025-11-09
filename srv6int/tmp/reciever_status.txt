@@ -1,2 +1,0 @@
-socket ready
-Sent metadata results to [2001:1:1::1]:9999

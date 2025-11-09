@@ -13,6 +13,14 @@ import graphviz
 
 CPU_PORT = 255
 
+def AddSwitch(net,name,ipv6_addresses):
+    return net.addSwitch(name, 
+        cls=ONOSBmv2Switch,
+        cpuport=CPU_PORT,
+        json="p4src/main.json",
+        pktdump=True,
+        ipv6_addresses=ipv6_addresses)
+
 def OneRouter():
     net = Mininet(controller=RemoteController)  # don’t auto-create default
     ctrlIP = "10.0.0.1"
@@ -34,14 +42,6 @@ def OneRouter():
     net.start()
     CLI(net)
     net.stop()
-
-def AddSwitch(net,name,ipv6_addresses):
-    return net.addSwitch(name, 
-        cls=ONOSBmv2Switch,
-        cpuport=CPU_PORT,
-        json="p4src/main.json",
-        pktdump=True,
-        ipv6_addresses=ipv6_addresses)
 
 def TwoRouters():
     ctrlIP = "10.0.0.1"
@@ -141,14 +141,10 @@ def custom_topo(file,mapping_file=None,cli=False,only_cli=False,vis=True):
     with open(file,'r') as f:edges = f.read()
     edges = edges.split('\n')
     edges = [edge.split(',') for edge in edges[1:] if edge]
-    print('\nEdges')
-    for edge in edges:print(edge)
     nodes = [edge[0].strip() for edge in edges] + [edge[1].strip() for edge in edges]
     nodes:list[str] = list(set(nodes))
     hosts = [h for h in nodes if h.startswith('h')]
-    print('\nHosts:',hosts)
     switches = [s for s in nodes if s.startswith('s') or s.startswith('r')]
-    print('Switches:',switches)
     nodes = hosts + switches
     Addresses = {}
     Host_Addresses = {}
@@ -217,7 +213,6 @@ def custom_topo(file,mapping_file=None,cli=False,only_cli=False,vis=True):
         if (A,B) in Done: continue
         if (B,A) in Done: continue
         net.addLink(Nodes[A],Nodes[B])
-        print("added link",(A,B))
         Done.append((A,B))
 
     for s in switches:
@@ -246,12 +241,8 @@ def custom_topo(file,mapping_file=None,cli=False,only_cli=False,vis=True):
     if cli:CLI(net)
     net.stop()
 
-
-
-
 if __name__=="__main__":
     import sys
     cli = ("--cli" in sys.argv)
     only_cli = ("--only_cli" in sys.argv)
-    # TwoRoutersThreeHosts(cli,only_cli)
     custom_topo("mininet/interfaces.csv","mininet/flow.json",cli,only_cli)

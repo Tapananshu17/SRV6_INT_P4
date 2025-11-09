@@ -1,11 +1,6 @@
 c0 python3 mininet/ospf.py
-c0 python3 mininet/set_flow_tables.py
+c0 python3 mininet/set_flow_tables.py 1> /dev/null 2> /dev/null
 h3 echo "h3: server starting.."
 h3 python3 mininet/reciever.py &
-h1 echo "h1: sending packet.."
-h1 # python3 mininet/sender_srv6.py h1-eth0 00:00:00:00:00:10 2001:1:1::1 00:00:00:00:00:20 2001:1:1::fa 2001:1:3::2,2001:1:a::fb
-h1 python3 mininet/sender_srv6.py h1-eth0 h1,s1,h3 01111
-h3 echo "h3: showing status.."
-h3 cat tmp/reciever_status.txt
-h3 echo "h3: showing packets received.."
-h3 cat tmp/received.txt
+h1 echo "h1: crafting and sending probe.."
+h1 python3 mininet/sender.py h1-eth0 h1,s1,s2,h3 01111

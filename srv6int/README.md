@@ -133,19 +133,6 @@ The putput will be
 ~/SRV6_INT_P4/srv6int$ sudo mn -c 1>/dev/null 2>/dev/null
 ~/SRV6_INT_P4/srv6int$ sudo python3 mininet/topo.py --only_cli
 
-Edges
-['h1', '', '2001:1:1::1/64', '00:00:00:00:00:10', '2001:1:1::fa', '']
-['h2', '', '2001:1:2::2/64', '00:00:00:00:00:21', '2001:1:2::fb', '']
-['h3', '', '2001:1:3::1/64', '00:00:00:00:00:30', '2001:1:3::fa', '']
-['s1', 'h1', '2001:1:1::fa/128', '00:00:00:00:00:1a', '2001:1:1::1/128', '00:00:00:00:00:10']
-['s1', 'h3', '2001:1:3::fa/128', '00:00:00:00:00:3a', '2001:1:3::1/128', '00:00:00:00:00:30']
-['s2', 'h2', '2001:1:2::fb/128', '00:00:00:00:00:2b', '2001:1:2::2/128', '00:00:00:00:00:21']
-['s2', 'h3', '2001:1:3::fb/128', '00:00:00:00:00:3b', '2001:1:3::2/128', '00:00:00:00:00:31']
-['s1', 's2', '2001:1:b::fa/128', '00:00:00:00:00:ba', '2001:1:a::fb/128', '00:00:00:00:00:ab']
-
-Hosts: ['h1', 'h3', 'h2']
-Switches: ['s1', 's2']
-
 Host config
 h1 : ['2001:1:1::1/64', '00:00:00:00:00:10', '2001:1:1::fa']
 h2 : ['2001:1:2::2/64', '00:00:00:00:00:21', '2001:1:2::fb']
@@ -170,33 +157,8 @@ Addresses
 Unable to contact the remote controller at 10.0.0.1:6653
 Unable to contact the remote controller at 10.0.0.1:6633
 Setting remote controller to 10.0.0.1:6653
-added link ('s1', 'h1')
-added link ('s1', 'h3')
-added link ('s2', 'h2')
-added link ('s2', 'h3')
-added link ('s1', 's2')
-2001:1:1::fa/128 00:00:00:00:00:1a
-Assigned 2001:1:1::fa/128 to s1:s1-eth1
-2001:1:3::fa/128 00:00:00:00:00:3a
-Assigned 2001:1:3::fa/128 to s1:s1-eth2
-2001:1:b::fa/128 00:00:00:00:00:ba
-Assigned 2001:1:b::fa/128 to s1:s1-eth3
-2001:1:2::fb/128 00:00:00:00:00:2b
-Assigned 2001:1:2::fb/128 to s2:s2-eth1
-2001:1:3::fb/128 00:00:00:00:00:3b
-Assigned 2001:1:3::fb/128 to s2:s2-eth2
-2001:1:a::fb/128 00:00:00:00:00:ab
-Assigned 2001:1:a::fb/128 to s2:s2-eth3
-2001:1:1::1/128 00:00:00:00:00:10
-Assigned 2001:1:1::1/128 to h1:h1-eth0
-2001:1:3::1/128 00:00:00:00:00:30
-Assigned 2001:1:3::1/128 to h3:h3-eth0
-2001:1:3::2/128 00:00:00:00:00:31
-Assigned 2001:1:3::2/128 to h3:h3-eth1
-2001:1:2::2/128 00:00:00:00:00:21
-Assigned 2001:1:2::2/128 to h2:h2-eth0
-..⚡️ simple_switch_grpc @ 1422056
-.....⚡️ simple_switch_grpc @ 1422075
+...⚡️ simple_switch_grpc @ 1514977
+..⚡️ simple_switch_grpc @ 1514996
 mininet> 
 ```
 
@@ -274,81 +236,52 @@ h3 python3 mininet/reciever.py &
 Then, `h1` can send SRv6 enabled INT probles with `h3` as the final destination as
 
 ```
-h1 python3 mininet/sender_srv6.py h1-eth0 h1,s1,h3 01111
+h1 python3 mininet/sender.py h1-eth0 h1,s1,h3 01111
 ```
 
 or as 
 
 ```
-h1 python3 mininet/sender_srv6.py h1-eth0 00:00:00:00:00:10 2001:1:1::1 00:00:00:00:00:20 2001:1:1::fa 2001:1:3::2,2001:1:a::fb
+h1 python3 mininet/sender.py h1-eth0 00:00:00:00:00:10 2001:1:1::1 00:00:00:00:00:20 2001:1:1::fa 2001:1:3::2,2001:1:a::fb
 ```
 
 On executing, we get this output :
 
 ```
 mininet> h3 python3 mininet/reciever.py &
-mininet> h1 /home/p4/src/p4dev-python-venv/bin/python3 mininet/sender_srv6.py h1-eth0 h1,s1,h3 01111
-arguments parsed
-src MAC : 00:00:00:00:00:10
-src IP : 2001:1:1::1
-dst MAC : 00:00:00:00:00:1a
-dst IP : 2001:1:1::fa
-srv6 SIDs : ['2001:1:3::1']
-INT header : 40078000
-SRv6 stuff : 3b0204010000000020010001000300000000000000000001
-Crafted Packet: 00000000001a000000000010ffff400780006000000000182b4020010001000100000000000000000001200100010001000000000000000000fa3b0204010000000020010001000300000000000000000001
-Listener bound to interface h1-eth0
-Listener thread started. Waiting for INT results on [2001:1:1::1]:9999...
-.
-[Listener] Raw packet received on h1-eth0!
-Raw packet length: 82 bytes
-Packet hex (first 200 chars): 00000000001a000000000010ffff400780006000000000182b4020010001000100000000000000000001200100010001000000000000000000fa3b0204010000000020010001000300000000000000000001
-EtherType: ffff
-Skipping non-IPv6 packet (ethertype: ffff)
-
-Sent 1 packets.
-
-[Listener] Raw packet received on h1-eth0!
-Raw packet length: 160 bytes
-Packet hex (first 200 chars): 00000000001000000000003a86dd020100003e4462ea00003e4467c56000f323005c113f2001000100030000000000000000000120010001000100000000000000000001d740270f005c40775b7b22696e506f72744944223a20312c202265506f727449
-EtherType: 86dd
-Next header: 98 (17=UDP)
-Skipping non-UDP packet (next header: 98)
-
-[Listener] Raw packet received on h1-eth0!
-Raw packet length: 160 bytes
-Packet hex (first 200 chars): 00000000001000000000003a86dd020100003e44634d00003e447400600d43c9005c113f20010001000300000000000000000001200100010001000000000000000000018f62270f005c40775b7b22696e506f72744944223a20312c202265506f727449
-EtherType: 86dd
-Next header: 99 (17=UDP)
-Skipping non-UDP packet (next header: 99)
-
-[Listener] Raw packet received on h1-eth0!
-Raw packet length: 146 bytes
-Packet hex (first 200 chars): 00000000001000000000003a86dd600fde53005c113f2001000100030000000000000000000120010001000100000000000000000001a162270f005c40775b7b22696e506f72744944223a20312c202265506f72744944223a20322c2022696e54696d65
-EtherType: 86dd
-Next header: 17 (17=UDP)
-UDP src_port: 41314, dst_port: 9999, length: 92
+mininet> h1 python3 mininet/sender.py h1-eth0 h1,s1,h3 01111
+Packet Information
+        src MAC : 00:00:00:00:00:10
+        src IP : 2001:1:1::1
+        dst MAC : 00:00:00:00:00:1a
+        dst IP : 2001:1:1::fa
+        srv6 SIDs : ['2001:1:3::1']
+Crafted probe!
+Waiting for INT results on [2001:1:1::1]:9999...
+[Listener] Raw packet of length 131 bytes received on h1-eth0!
+Skipping packet - wrong destination port (expected 9999, got 5353)
+[Listener] Raw packet of length 70 bytes received on h1-eth0!
+Skipping non-UDP packet (next header: 58)
+Sending packet...
+Probe packet sent on interface h1-eth0
+Waiting for response (timeout: 30 seconds)...
+[Listener] Raw packet of length 140 bytes received on h1-eth0!
 --- Received Telemetry Results ---
-Payload length: 84 bytes
-Payload (raw): b'[{"inPortID": 1, "ePortID": 2, "inTimeStamp": 1044664455, "eTimeStamp": 1044667831}]'
-Payload (decoded): [{"inPortID": 1, "ePortID": 2, "inTimeStamp": 1044664455, "eTimeStamp": 1044667831}]
+Payload length: 78 bytes
 Parsed Hop Data:
   [Hop 1]
     inPortID : 1
     ePortID : 2
-    inTimeStamp : 1044664455
-    eTimeStamp : 1044667831
+    inTimeStamp : 4337879
+    eTimeStamp : 4345853
 ------------------------------------
-Probe packet sent on interface h1-eth0
-Waiting for response (timeout: 30 seconds)...
-Listener thread exiting.
+----------sender.py finished----------
 ```
 
 The `tmp/received.txt` file will now have something like this :
 
 ```
-Received packet with ethertype ffff on h3-eth0
-Received INT Probe: 00000000003000000000001affff40178000010200004313e97c00004313efac6000000000182b3f20010001000100000000000000000001200100010003000000000000000000013b0204000000000020010001000300000000000000000001
+Received INT probe: 00000000003000000000001affff4017800001020000004230d7000000424ffd6000000000182b3f20010001000100000000000000000001200100010003000000000000000000013b0204000000000020010001000300000000000000000001
 	 dst_MAC : 000000000030
 	 src_MAC : 00000000001a
 	 ethertype : ffff
@@ -356,13 +289,13 @@ Received INT Probe: 00000000003000000000001affff40178000010200004313e97c00004313
 	 n : 1
 	 bitmap : 01111000000000000000
 	 metadata bits : 112
-	 meta_list : 010200004313e97c00004313efac
-	 IPv6feilds : 6000000000182b3f
-	 dst_IP_hex : 20010001000100000000000000000001
-	 src_IP_hex : 20010001000300000000000000000001
+	 meta_list : 01020000004230d7000000424ffd
+	 IPv6fields : 6000000000182b3f
+	 src_IP_hex : 20010001000100000000000000000001
+	 dst_IP_hex : 20010001000300000000000000000001
 	 srv6 : 3b0204000000000020010001000300000000000000000001
 	Parsed meta list:
-	 {'inPortID': 1, 'ePortID': 2, 'inTimeStamp': 1125378428, 'eTimeStamp': 1125380012}
+	 {'inPortID': 1, 'ePortID': 2, 'inTimeStamp': 4337879, 'eTimeStamp': 4345853}
 ```
 
 To have the INT probe visit both `s1` and `s2`, we can use :
@@ -376,28 +309,42 @@ For example
 ```
 mininet> h3 python3 mininet/reciever.py &
 mininet> h1 python3 mininet/sender_srv6.py h1-eth0 h1,s1,s2,h3 01111
-arguments parsed
-src MAC : 00:00:00:00:00:10
-src IP : 2001:1:1::1
-dst MAC : 00:00:00:00:00:1a
-dst IP : 2001:1:1::fa
-srv6 SIDs : ['2001:1:3::2', '2001:1:a::fb']
-INT header : 40078000
-SRv6 stuff : 3b040402010000002001000100030000000000000000000220010001000a000000000000000000fb
-Crafted Packet: 00000000001a000000000010ffff400780006000000000282b4020010001000100000000000000000001200100010001000000000000000000fa3b040402010000002001000100030000000000000000000220010001000a000000000000000000fb
-Listener thread started. Waiting for INT results on [2001:1:1::1]:9999...
-.
-Sent 1 packets.
+Packet Information
+        src MAC : 00:00:00:00:00:10
+        src IP : 2001:1:1::1
+        dst MAC : 00:00:00:00:00:1a
+        dst IP : 2001:1:1::fa
+        srv6 SIDs : ['2001:1:3::2', '2001:1:a::fb']
+Crafted probe!
+Waiting for INT results on [2001:1:1::1]:9999...
+[Listener] Raw packet of length 70 bytes received on h1-eth0!
+Skipping non-UDP packet (next header: 58)
+Sending packet...
 Probe packet sent on interface h1-eth0
-Main script finished.
+Waiting for response (timeout: 30 seconds)...
+[Listener] Raw packet of length 218 bytes received on h1-eth0!
+--- Received Telemetry Results ---
+Payload length: 156 bytes
+Parsed Hop Data:
+  [Hop 1]
+    inPortID : 1
+    ePortID : 3
+    inTimeStamp : 4817767
+    eTimeStamp : 4820521
+  [Hop 2]
+    inPortID : 3
+    ePortID : 2
+    inTimeStamp : 4435464
+    eTimeStamp : 4440049
+------------------------------------
+----------sender.py finished----------
 mininet> exit
 ```
 
 This now gives two sets of metadata entries in the filled probe.
 
 ```
-Received packet with ethertype ffff on h3-eth1
-Received INT Probe: 0000000000310000000000abffff402780000103000002773447000002773a5503020000027909ea00000279114f6000000000282b3e20010001000100000000000000000001200100010003000000000000000000023b040400010000002001000100030000000000000000000220010001000a000000000000000000fb
+Received INT probe: 0000000000310000000000abffff402780000103000000498367000000498e29030200000043ae0800000043bff16000000000282b3e20010001000100000000000000000001200100010003000000000000000000023b040400010000002001000100030000000000000000000220010001000a000000000000000000fb
 	 dst_MAC : 000000000031
 	 src_MAC : 0000000000ab
 	 ethertype : ffff
@@ -405,12 +352,12 @@ Received INT Probe: 0000000000310000000000abffff40278000010300000277344700000277
 	 n : 2
 	 bitmap : 01111000000000000000
 	 metadata bits : 112
-	 meta_list : 0103000002773447000002773a5503020000027909ea00000279114f
-	 IPv6feilds : 6000000000282b3e
-	 dst_IP_hex : 20010001000100000000000000000001
-	 src_IP_hex : 20010001000300000000000000000002
+	 meta_list : 0103000000498367000000498e29030200000043ae0800000043bff1
+	 IPv6fields : 6000000000282b3e
+	 src_IP_hex : 20010001000100000000000000000001
+	 dst_IP_hex : 20010001000300000000000000000002
 	 srv6 : 3b040400010000002001000100030000000000000000000220010001000a000000000000000000fb
 	Parsed meta list:
-	 {'inPortID': 1, 'ePortID': 3, 'inTimeStamp': 41366599, 'eTimeStamp': 41368149}
-	 {'inPortID': 3, 'ePortID': 2, 'inTimeStamp': 41486826, 'eTimeStamp': 41488719}
+	 {'inPortID': 1, 'ePortID': 3, 'inTimeStamp': 4817767, 'eTimeStamp': 4820521}
+	 {'inPortID': 3, 'ePortID': 2, 'inTimeStamp': 4435464, 'eTimeStamp': 4440049}
 ```

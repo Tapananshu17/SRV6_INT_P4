@@ -18,7 +18,7 @@ class IPv6Host(Host):
         
         super(IPv6Host, self).terminate()
 
-    def AddIPv6Addrs(self, ipv6_addresses, **kwargs):
+    def AddIPv6Addrs(self, ipv6_addresses, debug=False, **kwargs):
         
         self.cmd('sysctl -w net.ipv6.conf.all.forwarding=0')
 
@@ -30,8 +30,7 @@ class IPv6Host(Host):
                 
                 if isinstance(ipv6,list): ipv6,mac = ipv6
                 else: mac = None
-                print(ipv6,mac)
                 if mac is not None:self.intf(intf_name).setMAC(mac)
                 
                 self.cmd(f'ip -6 addr add {ipv6} dev {intf_name}') 
-                print(f"Assigned {ipv6} to {self.name}:{intf_name}")
+                if debug: print(f"Assigned {ipv6} to {self.name}:{intf_name}")
