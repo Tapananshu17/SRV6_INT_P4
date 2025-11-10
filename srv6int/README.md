@@ -391,7 +391,7 @@ Received INT probe: 0000000000310000000000abffff40278000010300000049836700000049
 	 {'inPortID': 3, 'ePortID': 2, 'inTimeStamp': 4435464, 'eTimeStamp': 4440049}
 ```
 
-#### Quality of real-time measurements
+## Quality of real-time measurement
 
 The main incentive to use INT is that it can continuously measure in real-time with no overhead on the telemetry application and routing processor caused due to a management plane protocol such as SNMP. 
 To get a measure of how "real-time" these measurements are, we can run the `server.py` script with the `--time` option. Without the `--time` option, it starts an active INT server, similar to the SFANT system. With the option, it additionally times this process at various 2 stages: the probe end-to-end delay, and the processing time (for parsing the probe). The time for crafting the probe is not included since that is done only once when a telemetry request arrives; after that the same packet is re-sent periodically.
@@ -412,3 +412,73 @@ The script also created this histogram:
 
 Compared to this, the interval at which telemetry data is polled in a traditional SNMP-based Network Telemetry system is in seconds to half a minute.
 
+## Overhead due to INT
+
+Since packets containing INT headers are processed for longer in the switches, they cause queuing delay for other packets. We want to know how severe this may be. To do that, I have created scripts `flood_sender.py` and `flood_receiver.py` that send and receive 5 MB of data (including headers) over UDP. 
+The `flood_sender.py` script takes in the interface, source host, destination host, average rate $r$ in Mbps, packet size $L$ in bytes, burst length $n$, and total amount of data to send in MB. For the given topology, an appropriate pair of source host and destination host is "h1" and "h2" and an appropriate amount of data to send is 5 MB.
+For example, `h1 python3 mininet/flood_sender.py h1-eth0 "h1" "h2" 4 500 5 5`. It also writes the time at which it started sending data to `tmp/flood_start.txt` and the time when it finished as well as bytes sent to `tmp/flood_end.txt` . 
+The `flood_receiver.py` script on the other hand periodically writes the number of packets to `tmp/receiver_status.txt` .
+Using all of this data, `analysis.py` creates plots like these :
+
+![Number of received bytes with no INT](images/Flood_1_500_1.png)
+
+This one was created using $r=1,\, L =500,\, n = 1$ .
+
+Here are some more with varying values of $r$, keeping other parameters constant and contrasting them with the case INT probes are being sent but no metadata is requested.
+
+<table>
+<tr>
+<td> r (Mbps) </td> <td> No INT </td> <td> INT but bitmap = 0 </td>
+</tr>
+
+<tr><td>1</td><td><img src=images/Flood_1_500_1.png height=100px></td><td><img src=images/Flood_1_500_1_0.png height=100px></td></tr>
+<tr><td>2</td><td><img src=images/Flood_2_500_1.png height=100px></td><td><img src=images/Flood_2_500_1_0.png height=100px></td></tr>
+<tr><td>4</td><td><img src=images/Flood_4_500_1.png height=100px></td><td><img src=images/Flood_4_500_1_0.png height=100px></td></tr>
+<tr><td>5</td><td><img src=images/Flood_5_500_1.png height=100px></td><td><img src=images/Flood_5_500_1_0.png height=100px></td></tr>
+</table>
+
+For the second case, the probes are being sent from `h3` which using the `server.py` script with `--time` option. These probes are sent at an interval of 100 ms.
+
+As you can see from the images, with an increase in $r$, the packets lost  (the gap between the orange horizontal line and the last reading for packets received) increases.
+Moreover, the case where INT probes are also being sent is almost identical.
+
+Thus, we can conclude that there is minimal overhead due to the extra INT probes.
+
+Now, we move on to the case where we are requesting only the egress port values. The egress port value is stored as a 8 bit value in the metadata list.
+We will compare this with the case where there are no INT probes being sent.
+For both, we will use $r=5$, $n=1$ and $L=500$ .
+
+<table>
+<tr>
+<td>Requesting Egress Port</td>
+<td>No INT</td>
+</tr>
+<tr>
+<td><img src="images/Flood_5_500_1_01.png" height=200px></td>
+<td><img src="images/Flood_5_500_1.png" height=200px></td>
+</tr>
+</table>
+
+As you can see, there is a significant change. This is because the processing time for the probes has suddenly become much worse than before. 
+This substantially increases the queue length and causes packet loss. 
+
+The reason for this sudden increase is this line in `main.p4`:
+
+```C++
+hdr.ePortID.value = (bit<8>)(standard_metadata.egress_spec);
+```
+
+In particular, accessing `standard_metadata.egress_spec`, which is the standard way to get metadata is handled using C++ data structures rather than native pipeline fields.
+This is a general problem with the behavioural model (`BMv2`), since it is interpreted, rather than compiled.
+To remedy this, one can move to `tofino-model` which _is_ compiled.
+But even using `tofino-model` we will not get the real delay, since it is only compiled and not burnt into hardware.
+Using only software, it is impossible to get the actual delays that one would see in a real programmable switch.
+
+Thus, we cannot proceed with the overhead computation by measurement alone.
+Instead, we need to use the values observed on hardware for different computations done and predict the delay.
+
+Usually, these computations are done under one micro-second [[1](https://www.intel.com/content/www/us/en/products/network-io/programmable-ethernet-switch/tofino-series.html)], and thus cause negligible delays as compared to the transmission delay of at least $1\, \mu\text{s}$ with packet size of 500 bytes and a 4 Gbps transmission rate.
+
+## References
+
+[1] Barefoot Networks. *Tofino: World’s Fastest P4-Programmable Ethernet Switch ASICs.* Intel Corporation, 2020. [Link](https://www.intel.com/content/www/us/en/products/network-io/programmable-ethernet-switch/tofino-series.html)
