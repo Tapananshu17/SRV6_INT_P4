@@ -158,7 +158,7 @@ class Request:
         self.sending = True
         while self.sending:
             send_probe_packet(self.probe,self.intf)
-            time.sleep(0.01)
+            time.sleep(0.1)
     def fulfill(self,f=None,g=None):
         if self.rtype == "path":
             self.craft_probe()

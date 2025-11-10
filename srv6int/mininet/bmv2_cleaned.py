@@ -103,7 +103,7 @@ class ONOSBmv2Switch(Switch):
     
     mininet_exception = multiprocessing.Value('i', 0)
 
-    def __init__(self, name, json=None, debugger=False, loglevel="trace",
+    def __init__(self, name, json=None, debugger=False, loglevel="off",
                  elogger=False, grpcport=None, cpuport=255, notifications=False,
                  thriftport=None, netcfg=False, dryrun=False,
                  pipeconf=DEFAULT_PIPECONF, pktdump=False, valgrind=False,

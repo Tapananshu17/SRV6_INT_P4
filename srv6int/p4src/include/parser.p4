@@ -218,11 +218,11 @@ parser ParserImpl (packet_in packet,
 
     state parse_srv6 {
         packet.extract(hdr.srv6h);
-        log_msg("hdr.srv6h.next_hdr = {}",{hdr.srv6h.next_hdr});
-        log_msg("hdr.srv6h.hdr_ext_len = {}",{hdr.srv6h.hdr_ext_len});
-        log_msg("hdr.srv6h.routing_type = {}",{hdr.srv6h.routing_type});
-        log_msg("hdr.srv6h.segment_left = {}",{hdr.srv6h.segment_left});
-        log_msg("hdr.srv6h.last_entry = {}",{hdr.srv6h.last_entry});
+        // log_msg("hdr.srv6h.next_hdr = {}",{hdr.srv6h.next_hdr});
+        // log_msg("hdr.srv6h.hdr_ext_len = {}",{hdr.srv6h.hdr_ext_len});
+        // log_msg("hdr.srv6h.routing_type = {}",{hdr.srv6h.routing_type});
+        // log_msg("hdr.srv6h.segment_left = {}",{hdr.srv6h.segment_left});
+        // log_msg("hdr.srv6h.last_entry = {}",{hdr.srv6h.last_entry});
         transition parse_srv6_list;
     }
     state parse_srv6_list {
@@ -236,9 +236,9 @@ parser ParserImpl (packet_in packet,
 
     state mark_current_srv6 {
         
-        log_msg("hdr.srv6_list.last.segment_id = {}", {hdr.srv6_list.last.segment_id});
+        // log_msg("hdr.srv6_list.last.segment_id = {}", {hdr.srv6_list.last.segment_id});
         local_metadata.next_srv6_sid = hdr.srv6_list.last.segment_id;
-        log_msg("local_metadata.next_srv6_sid = {}", {local_metadata.next_srv6_sid});
+        // log_msg("local_metadata.next_srv6_sid = {}", {local_metadata.next_srv6_sid});
         transition check_last_srv6;
     }
 

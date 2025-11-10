@@ -5,18 +5,8 @@
       "id" : 0,
       "fields" : [
         ["tmp", 1, false],
-        ["tmp_0", 8, false],
-        ["tmp_1", 8, false],
-        ["tmp_2", 8, false],
-        ["tmp_3", 8, false],
-        ["tmp_4", 8, false],
-        ["tmp_5", 1, false],
-        ["tmp_6", 128, false],
-        ["tmp_7", 128, false],
-        ["tmp_8", 1, false],
-        ["tmp_9", 8, false],
-        ["tmp_10", 8, false],
-        ["tmp_11", 9, false],
+        ["tmp_0", 1, false],
+        ["tmp_1", 1, false],
         ["cond", 1, false],
         ["local_metadata_t.xconnect", 1, false],
         ["local_metadata_t.next_srv6_sid", 128, false],
@@ -26,7 +16,7 @@
         ["local_metadata_t.l4_src_port", 16, false],
         ["local_metadata_t.l4_dst_port", 16, false],
         ["local_metadata_t.switch_id", 8, false],
-        ["_padding_0", 2, false]
+        ["_padding_0", 3, false]
       ]
     },
     {
@@ -2694,216 +2684,6 @@
                 }
               ],
               "op" : "extract"
-            },
-            {
-              "parameters" : [
-                {
-                  "type" : "field",
-                  "value" : ["scalars", "tmp_0"]
-                },
-                {
-                  "type" : "field",
-                  "value" : ["srv6h", "next_hdr"]
-                }
-              ],
-              "op" : "set"
-            },
-            {
-              "parameters" : [
-                {
-                  "op" : "log_msg",
-                  "parameters" : [
-                    {
-                      "type" : "string",
-                      "value" : "hdr.srv6h.next_hdr = {}"
-                    },
-                    {
-                      "type" : "parameters_vector",
-                      "value" : [
-                        {
-                          "type" : "field",
-                          "value" : ["scalars", "tmp_0"]
-                        }
-                      ]
-                    }
-                  ],
-                  "source_info" : {
-                    "filename" : "include/parser.p4",
-                    "line" : 221,
-                    "column" : 8,
-                    "source_fragment" : "        log_msg(\\\"hdr.srv6h.next_hdr = {}\\\",{hdr.srv6h.next_hdr});"
-                  }
-                }
-              ],
-              "op" : "primitive"
-            },
-            {
-              "parameters" : [
-                {
-                  "type" : "field",
-                  "value" : ["scalars", "tmp_1"]
-                },
-                {
-                  "type" : "field",
-                  "value" : ["srv6h", "hdr_ext_len"]
-                }
-              ],
-              "op" : "set"
-            },
-            {
-              "parameters" : [
-                {
-                  "op" : "log_msg",
-                  "parameters" : [
-                    {
-                      "type" : "string",
-                      "value" : "hdr.srv6h.hdr_ext_len = {}"
-                    },
-                    {
-                      "type" : "parameters_vector",
-                      "value" : [
-                        {
-                          "type" : "field",
-                          "value" : ["scalars", "tmp_1"]
-                        }
-                      ]
-                    }
-                  ],
-                  "source_info" : {
-                    "filename" : "include/parser.p4",
-                    "line" : 222,
-                    "column" : 8,
-                    "source_fragment" : "        log_msg(\\\"hdr.srv6h.hdr_ext_len = {}\\\",{hdr.srv6h.hdr_ext_len});"
-                  }
-                }
-              ],
-              "op" : "primitive"
-            },
-            {
-              "parameters" : [
-                {
-                  "type" : "field",
-                  "value" : ["scalars", "tmp_2"]
-                },
-                {
-                  "type" : "field",
-                  "value" : ["srv6h", "routing_type"]
-                }
-              ],
-              "op" : "set"
-            },
-            {
-              "parameters" : [
-                {
-                  "op" : "log_msg",
-                  "parameters" : [
-                    {
-                      "type" : "string",
-                      "value" : "hdr.srv6h.routing_type = {}"
-                    },
-                    {
-                      "type" : "parameters_vector",
-                      "value" : [
-                        {
-                          "type" : "field",
-                          "value" : ["scalars", "tmp_2"]
-                        }
-                      ]
-                    }
-                  ],
-                  "source_info" : {
-                    "filename" : "include/parser.p4",
-                    "line" : 223,
-                    "column" : 8,
-                    "source_fragment" : "        log_msg(\\\"hdr.srv6h.routing_type = {}\\\",{hdr.srv6h.routing_type});"
-                  }
-                }
-              ],
-              "op" : "primitive"
-            },
-            {
-              "parameters" : [
-                {
-                  "type" : "field",
-                  "value" : ["scalars", "tmp_3"]
-                },
-                {
-                  "type" : "field",
-                  "value" : ["srv6h", "segment_left"]
-                }
-              ],
-              "op" : "set"
-            },
-            {
-              "parameters" : [
-                {
-                  "op" : "log_msg",
-                  "parameters" : [
-                    {
-                      "type" : "string",
-                      "value" : "hdr.srv6h.segment_left = {}"
-                    },
-                    {
-                      "type" : "parameters_vector",
-                      "value" : [
-                        {
-                          "type" : "field",
-                          "value" : ["scalars", "tmp_3"]
-                        }
-                      ]
-                    }
-                  ],
-                  "source_info" : {
-                    "filename" : "include/parser.p4",
-                    "line" : 224,
-                    "column" : 8,
-                    "source_fragment" : "        log_msg(\\\"hdr.srv6h.segment_left = {}\\\",{hdr.srv6h.segment_left});"
-                  }
-                }
-              ],
-              "op" : "primitive"
-            },
-            {
-              "parameters" : [
-                {
-                  "type" : "field",
-                  "value" : ["scalars", "tmp_4"]
-                },
-                {
-                  "type" : "field",
-                  "value" : ["srv6h", "last_entry"]
-                }
-              ],
-              "op" : "set"
-            },
-            {
-              "parameters" : [
-                {
-                  "op" : "log_msg",
-                  "parameters" : [
-                    {
-                      "type" : "string",
-                      "value" : "hdr.srv6h.last_entry = {}"
-                    },
-                    {
-                      "type" : "parameters_vector",
-                      "value" : [
-                        {
-                          "type" : "field",
-                          "value" : ["scalars", "tmp_4"]
-                        }
-                      ]
-                    }
-                  ],
-                  "source_info" : {
-                    "filename" : "include/parser.p4",
-                    "line" : 225,
-                    "column" : 8,
-                    "source_fragment" : "        log_msg(\\\"hdr.srv6h.last_entry = {}\\\",{hdr.srv6h.last_entry});"
-                  }
-                }
-              ],
-              "op" : "primitive"
             }
           ],
           "transitions" : [
@@ -2933,7 +2713,7 @@
               "parameters" : [
                 {
                   "type" : "field",
-                  "value" : ["scalars", "tmp_5"]
+                  "value" : ["scalars", "tmp_0"]
                 },
                 {
                   "type" : "expression",
@@ -3024,7 +2804,7 @@
           "transition_key" : [
             {
               "type" : "field",
-              "value" : ["scalars", "tmp_5"]
+              "value" : ["scalars", "tmp_0"]
             }
           ]
         },
@@ -3032,51 +2812,6 @@
           "name" : "mark_current_srv6",
           "id" : 28,
           "parser_ops" : [
-            {
-              "parameters" : [
-                {
-                  "type" : "field",
-                  "value" : ["scalars", "tmp_6"]
-                },
-                {
-                  "type" : "expression",
-                  "value" : {
-                    "type" : "stack_field",
-                    "value" : ["srv6_list", "segment_id"]
-                  }
-                }
-              ],
-              "op" : "set"
-            },
-            {
-              "parameters" : [
-                {
-                  "op" : "log_msg",
-                  "parameters" : [
-                    {
-                      "type" : "string",
-                      "value" : "hdr.srv6_list.last.segment_id = {}"
-                    },
-                    {
-                      "type" : "parameters_vector",
-                      "value" : [
-                        {
-                          "type" : "field",
-                          "value" : ["scalars", "tmp_6"]
-                        }
-                      ]
-                    }
-                  ],
-                  "source_info" : {
-                    "filename" : "include/parser.p4",
-                    "line" : 239,
-                    "column" : 8,
-                    "source_fragment" : "        log_msg(\\\"hdr.srv6_list.last.segment_id = {}\\\", {hdr.srv6_list.last.segment_id});"
-                  }
-                }
-              ],
-              "op" : "primitive"
-            },
             {
               "parameters" : [
                 {
@@ -3092,51 +2827,6 @@
                 }
               ],
               "op" : "set"
-            },
-            {
-              "parameters" : [
-                {
-                  "type" : "field",
-                  "value" : ["scalars", "tmp_7"]
-                },
-                {
-                  "type" : "expression",
-                  "value" : {
-                    "type" : "stack_field",
-                    "value" : ["srv6_list", "segment_id"]
-                  }
-                }
-              ],
-              "op" : "set"
-            },
-            {
-              "parameters" : [
-                {
-                  "op" : "log_msg",
-                  "parameters" : [
-                    {
-                      "type" : "string",
-                      "value" : "local_metadata.next_srv6_sid = {}"
-                    },
-                    {
-                      "type" : "parameters_vector",
-                      "value" : [
-                        {
-                          "type" : "field",
-                          "value" : ["scalars", "tmp_7"]
-                        }
-                      ]
-                    }
-                  ],
-                  "source_info" : {
-                    "filename" : "include/parser.p4",
-                    "line" : 241,
-                    "column" : 8,
-                    "source_fragment" : "        log_msg(\\\"local_metadata.next_srv6_sid = {}\\\", {local_metadata.next_srv6_sid});"
-                  }
-                }
-              ],
-              "op" : "primitive"
             }
           ],
           "transitions" : [
@@ -3157,7 +2847,7 @@
               "parameters" : [
                 {
                   "type" : "field",
-                  "value" : ["scalars", "tmp_8"]
+                  "value" : ["scalars", "tmp_1"]
                 },
                 {
                   "type" : "expression",
@@ -3228,7 +2918,7 @@
           "transition_key" : [
             {
               "type" : "field",
-              "value" : ["scalars", "tmp_8"]
+              "value" : ["scalars", "tmp_1"]
             }
           ]
         },
@@ -4560,49 +4250,6 @@
             "column" : 8,
             "source_fragment" : "hdr.switchID.value = local_metadata.switch_id"
           }
-        },
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["scalars", "tmp_9"]
-            },
-            {
-              "type" : "field",
-              "value" : ["scalars", "local_metadata_t.switch_id"]
-            }
-          ],
-          "source_info" : {
-            "filename" : "main.p4",
-            "line" : 185,
-            "column" : 50,
-            "source_fragment" : "        log_msg(\\\"local_metadata.switch_id = {}\\\", {local_metadata.switch_id});"
-          }
-        },
-        {
-          "op" : "log_msg",
-          "parameters" : [
-            {
-              "type" : "string",
-              "value" : "local_metadata.switch_id = {}"
-            },
-            {
-              "type" : "parameters_vector",
-              "value" : [
-                {
-                  "type" : "field",
-                  "value" : ["scalars", "tmp_9"]
-                }
-              ]
-            }
-          ],
-          "source_info" : {
-            "filename" : "main.p4",
-            "line" : 185,
-            "column" : 8,
-            "source_fragment" : "        log_msg(\\\"local_metadata.switch_id = {}\\\", {local_metadata.switch_id});"
-          }
         }
       ]
     },
@@ -4666,115 +4313,6 @@
             "line" : 191,
             "column" : 8,
             "source_fragment" : "hdr.inPortID.value = (bit<8>)(standard_metadata.ingress_port)"
-          }
-        },
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["scalars", "tmp_10"]
-            },
-            {
-              "type" : "expression",
-              "value" : {
-                "type" : "expression",
-                "value" : {
-                  "op" : "&",
-                  "left" : {
-                    "type" : "expression",
-                    "value" : {
-                      "op" : "&",
-                      "left" : {
-                        "type" : "field",
-                        "value" : ["standard_metadata", "ingress_port"]
-                      },
-                      "right" : {
-                        "type" : "hexstr",
-                        "value" : "0x00ff"
-                      }
-                    }
-                  },
-                  "right" : {
-                    "type" : "hexstr",
-                    "value" : "0xff"
-                  }
-                }
-              }
-            }
-          ],
-          "source_info" : {
-            "filename" : "main.p4",
-            "line" : 192,
-            "column" : 44,
-            "source_fragment" : "        log_msg(\\\"hdr.inPortID.value = {}\\\", {hdr.inPortID.value});"
-          }
-        },
-        {
-          "op" : "log_msg",
-          "parameters" : [
-            {
-              "type" : "string",
-              "value" : "hdr.inPortID.value = {}"
-            },
-            {
-              "type" : "parameters_vector",
-              "value" : [
-                {
-                  "type" : "field",
-                  "value" : ["scalars", "tmp_10"]
-                }
-              ]
-            }
-          ],
-          "source_info" : {
-            "filename" : "main.p4",
-            "line" : 192,
-            "column" : 8,
-            "source_fragment" : "        log_msg(\\\"hdr.inPortID.value = {}\\\", {hdr.inPortID.value});"
-          }
-        },
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["scalars", "tmp_11"]
-            },
-            {
-              "type" : "field",
-              "value" : ["standard_metadata", "ingress_port"]
-            }
-          ],
-          "source_info" : {
-            "filename" : "main.p4",
-            "line" : 193,
-            "column" : 56,
-            "source_fragment" : "        log_msg(\\\"standard_metadata.ingress_port = {}\\\", {standard_metadata.ingress_port});"
-          }
-        },
-        {
-          "op" : "log_msg",
-          "parameters" : [
-            {
-              "type" : "string",
-              "value" : "standard_metadata.ingress_port = {}"
-            },
-            {
-              "type" : "parameters_vector",
-              "value" : [
-                {
-                  "type" : "field",
-                  "value" : ["scalars", "tmp_11"]
-                }
-              ]
-            }
-          ],
-          "source_info" : {
-            "filename" : "main.p4",
-            "line" : 193,
-            "column" : 8,
-            "source_fragment" : "        log_msg(\\\"standard_metadata.ingress_port = {}\\\", {standard_metadata.ingress_port});"
           }
         }
       ]

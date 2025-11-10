@@ -182,15 +182,15 @@ control IngressPipeImpl (inout parsed_headers_t hdr,
     action put_switchID(){
         hdr.switchID.setValid();
         hdr.switchID.value = local_metadata.switch_id;
-        log_msg("local_metadata.switch_id = {}", {local_metadata.switch_id});
+        // log_msg("local_metadata.switch_id = {}", {local_metadata.switch_id});
     }
 
     action put_inPortID(){
         hdr.inPortID.setValid();
 
         hdr.inPortID.value = (bit<8>)(standard_metadata.ingress_port);
-        log_msg("hdr.inPortID.value = {}", {hdr.inPortID.value});
-        log_msg("standard_metadata.ingress_port = {}", {standard_metadata.ingress_port});
+        // log_msg("hdr.inPortID.value = {}", {hdr.inPortID.value});
+        // log_msg("standard_metadata.ingress_port = {}", {standard_metadata.ingress_port});
         
     }
 
