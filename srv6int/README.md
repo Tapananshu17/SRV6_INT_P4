@@ -51,17 +51,22 @@ This is an abstraction of an IPv6-enabled host.
 
 #### `interfaces.csv`
 
-This CSV file contains information about the IP and MAC addresses associated with the interfaces on each communication link.
+This CSV file contains information about the IP and MAC addresses associated with the interfaces on each communication link. Each line is of one of these two formats :
 
-1. $(A,B,\text{IP}_A,\text{MAC}_A,\text{IP}_B,\text{MAC}_B)$ where $A,B$ are names of nodes in the Mininet topology, $\text{MAC}_A,\text{IP}_A$ are the MAC and IP addresses on $A$'s interfaces for the communication link and $\text{MAC}_B,\text{IP}_B$ are for $B$
+1. $(A,B,\text{IP}_A,\text{MAC}_A,\text{IP}_B,\text{MAC}_B,R,d)$ represents a communication link where 
+   * $A,B$ are names of nodes in the Mininet topology
+   * $R$ is the optional bandwidth in Mbps
+   * $d$ is the optional delay (in $\mu\text{s}$)
+   * $\text{MAC}_A,\text{IP}_A$ are the MAC and IP addresses on $A$'s interface for the communication link 
+   * $\text{MAC}_B,\text{IP}_B$ are for $B$'s interface oof the link
 
-2. $(A,\_,\text{IP}_A,\text{MAC}_A,\text{IP}_B,\_)$ where $A$ is a host with IP address $\text{IP}_A$, MAC address $\text{MAC}_A$ and default gateway $\text{IP}_B$
+2. $(A,\_,\text{IP}_A,\text{MAC}_A,\text{IP}_B,\_,\_,\_)$ where $A$ is a host with IP address $\text{IP}_A$, MAC address $\text{MAC}_A$ and default gateway $\text{IP}_B$
 
 This file is used at runtime to create the topology and run routing algorithms such as OSPF, following which, the table entries are computed for each P4 switch and it is programmed. 
 Changing this file is akin to changing the topology. In essence, this CSV file is a programming interface.
 The topology currently implemented is :
 
-![Topology](images/topo_M.png){height=200px}
+<img alt-text=Topology src=images/topo_M.png height=200px>
 
 #### `flow.json`
 
@@ -396,7 +401,7 @@ Received INT probe: 0000000000310000000000abffff40278000010300000049836700000049
 The main incentive to use INT is that it can continuously measure in real-time with no overhead on the telemetry application and routing processor caused due to a management plane protocol such as SNMP. 
 To get a measure of how "real-time" these measurements are, we can run the `server.py` script with the `--time` option. 
 
-![h3 server](images/topo_M_server.png){height=100px}
+<img src=images/topo_M_server.png height=150px>
 
 Without the `--time` option, it starts an active INT server, similar to the SFANT system. With the option, it additionally times this process at 2 stages: the probe end-to-end delay, and the processing time (for parsing the probe). The time for crafting the probe is not included since that is done only once when a telemetry request arrives; after that the same packet is re-sent periodically.
 We can run the script like this : 
@@ -412,7 +417,7 @@ saved to mininet/INT_delay.png
 The values in the output are in seconds. Thus, the mean "routing delay" is around 0.35 ms. This is the time elapsed from when a packet is sent to when it is received back. 
 The script also created this histogram:
 
-![INT delay](images/INT_delay.png)
+<img src=images/INT_delay.png height=300px>
 
 Compared to this, the interval at which telemetry data is polled in a traditional SNMP-based Network Telemetry system is in seconds to half a minute.
 
@@ -420,14 +425,14 @@ Compared to this, the interval at which telemetry data is polled in a traditiona
 
 Since packets containing INT headers are processed for longer in the switches, they cause queuing delay for other packets. We want to know how severe this may be. To do that, I have created scripts `flood_sender.py` and `flood_receiver.py` that send and receive 5 MB of data (including headers) over UDP. 
 
-![overhead measurement](images/topo_M_flood.png){height=100px}
+<img src=images/topo_M_flood.png height=150px>
 
 The `flood_sender.py` script takes in the interface, source host, destination host, average rate $r$ in Mbps, packet size $L$ in bytes, burst length $n$, and total amount of data to send in MB. For the given topology, an appropriate pair of source host and destination host is "h1" and "h2" and an appropriate amount of data to send is 5 MB.
 For example, `h1 python3 mininet/flood_sender.py h1-eth0 "h1" "h2" 4 500 5 5`. It also writes the time at which it started sending data to `tmp/flood_start.txt` and the time when it finished as well as bytes sent to `tmp/flood_end.txt` . 
 The `flood_receiver.py` script on the other hand periodically writes the number of packets to `tmp/receiver_status.txt` .
 Using all of this data, `analysis.py` creates plots like these :
 
-![Number of received bytes with no INT](images/Flood_1_500_1.png){height=200px}
+<img alt-text="Number of received bytes with no INT" src = images/Flood_1_500_1.png height=300px>
 
 This one was created using $r=1,\, L =500,\, n = 1$ .
 
@@ -438,15 +443,15 @@ Here are some more with varying values of $r$, keeping other parameters constant
 <td> r (Mbps) </td> <td> No INT </td> <td> INT but bitmap = 0 </td>
 </tr>
 
-<tr><td>1</td><td><img src=images/Flood_1_500_1.png height=100px></td><td><img src=images/Flood_1_500_1_0.png height=100px></td></tr>
-<tr><td>2</td><td><img src=images/Flood_2_500_1.png height=100px></td><td><img src=images/Flood_2_500_1_0.png height=100px></td></tr>
-<tr><td>4</td><td><img src=images/Flood_4_500_1.png height=100px></td><td><img src=images/Flood_4_500_1_0.png height=100px></td></tr>
-<tr><td>5</td><td><img src=images/Flood_5_500_1.png height=100px></td><td><img src=images/Flood_5_500_1_0.png height=100px></td></tr>
+<tr><td>1</td><td><img src=images/Flood_1_500_1.png height=150px></td><td><img src=images/Flood_1_500_1_0.png height=150px></td></tr>
+<tr><td>2</td><td><img src=images/Flood_2_500_1.png height=150px></td><td><img src=images/Flood_2_500_1_0.png height=150px></td></tr>
+<tr><td>4</td><td><img src=images/Flood_4_500_1.png height=150px></td><td><img src=images/Flood_4_500_1_0.png height=150px></td></tr>
+<tr><td>5</td><td><img src=images/Flood_5_500_1.png height=150px></td><td><img src=images/Flood_5_500_1_0.png height=150px></td></tr>
 </table>
 
 For the second case, the probes are being sent from `h3` which using the `server.py` script with `--time` option. These probes are sent at an interval of 100 ms.
 
-![flood and INT probes](images/topo_M_flood_INT.png){height=100px}
+<img src=images/topo_M_flood_INT.png height=150px>
 
 As you can see from the images, with an increase in $r$, the packets lost  (the gap between the orange horizontal line and the last reading for packets received) increases.
 Moreover, the case where INT probes are also being sent is almost identical.
