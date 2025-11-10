@@ -61,7 +61,7 @@ This file is used at runtime to create the topology and run routing algorithms s
 Changing this file is akin to changing the topology. In essence, this CSV file is a programming interface.
 The topology currently implemented is :
 
-![Topology](mininet/topo.png){height=200px}
+![Topology](images/topo_M.png){height=200px}
 
 #### `flow.json`
 
@@ -398,17 +398,17 @@ To get a measure of how "real-time" these measurements are, we can run the `serv
 We can run the script like this : 
 
 ```
-mininet> h3 python3 mininet/server.py h3-eth0 h3,s1,s2,h3 --time
-Probe end-to-end delay: mean= 0.0026116061210632326 , std= 0.0006598378759099222
-Processing delay: mean= 3.0332517623901366e-05 , std= 1.1348508267689347e-05
+mininet> h3 python3 mininet/server.py h3-eth0 h3,s1,s2,h3 001 --time
+Probe end-to-end delay: mean= 0.0003527455806732178 , std= 6.717807232196294e-05
+Processing delay: mean= 2.0142173767089843e-05 , std= 6.091096330625261e-06
 Packets arrived back: 5000 / 5000 = 100 %
 saved to mininet/INT_delay.png
 ```
 
-The values in the output are in seconds. Thus, the mean "routing delay" is around 3 ms. This is the time elapsed from when a packet is sent to when it is received back. 
+The values in the output are in seconds. Thus, the mean "routing delay" is around 0.35 ms. This is the time elapsed from when a packet is sent to when it is received back. 
 The script also created this histogram:
 
-![INT delay](mininet/INT_delay.png)
+![INT delay](images/INT_delay.png)
 
 Compared to this, the interval at which telemetry data is polled in a traditional SNMP-based Network Telemetry system is in seconds to half a minute.
 

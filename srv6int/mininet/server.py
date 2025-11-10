@@ -296,10 +296,10 @@ def time_probe(req:Request,f=None,g=None,iterations=5000):
     print("Processing delay: mean=",mean(PD),", std=",std(PD))
     print("Packets arrived back:",arrived,'/',iterations,'=',round(100*arrived/iterations),'%')
     import matplotlib.pyplot as plt
-    plt.hist(1000*array(RD))
-    plt.hist(1000*array(PD))
+    plt.hist(1e6*array(RD))
+    plt.hist(1e6*array(PD))
     plt.legend(["Probe end-to-end Delay","Processing Delay"])
-    plt.xlabel("time (ms)")
+    plt.xlabel("time ($\mu$s)")
     plt.ylabel("frequency")
     plt.title("INT delay")
     plt.savefig("mininet/INT_delay.png",format='PNG')
@@ -318,5 +318,5 @@ if __name__=="__main__":
         if timeit:time_probe(req)
         else: main(req,'mininet/parsed_probes.txt')
     else:print("Wrong arguments",args,
-    "\nUsage: python3 mininet/server.py <interface> <path> [OPTIONS]",
+    "\nUsage: python3 mininet/server.py <interface> <path> [<bitmap>] [OPTIONS]",
     "\nExample: h3 python3 mininet/server.py h3-eth0 h3,s1,s2,h3 --time")
