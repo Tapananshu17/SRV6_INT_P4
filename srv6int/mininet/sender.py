@@ -36,11 +36,7 @@ def send_probe_packet(pkt, intf):
 def listen_for_results(listen_ip, port, interface):
     s_udp = None
     try:
-        # Use AF_PACKET to get Ethernet headers (like receiver does)
         s_udp = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.ntohs(3))
-        # Don't bind to a specific interface
-        # s_udp.bind((interface, 0)) # NO
-        # print(f"Listener bound to interface {interface}") # NO
         print(f"Waiting for INT results on [{listen_ip}]:{port}...")
 
         while True:
@@ -54,8 +50,6 @@ def listen_for_results(listen_ip, port, interface):
                 pack_bytes = binascii.hexlify(data).decode('ascii')
                 
                 print(f"[Listener] Raw packet of length {len(data)} bytes received on {addr[0]}!")
-                # print(f"Raw packet length: {len(data)} bytes")
-                # print(f"Packet hex (first 200 chars): {pack_bytes[:200]}")
                 
                 # Ethernet header: 14 bytes (28 hex chars)
                 # Check EtherType (bytes 12-14, hex chars 24-28)
@@ -89,9 +83,8 @@ def listen_for_results(listen_ip, port, interface):
                 dst_port = int(udp_header[4:8], 16)
                 udp_length = int(udp_header[8:12], 16)
                 
-                # print(f"UDP src_port: {src_port}, dst_port: {dst_port}, length: {udp_length}")
+                print(f"UDP src_port: {src_port}, dst_port: {dst_port}, length: {udp_length}")
                 
-                # Verify it's for our port
                 if dst_port != port:
                     print(f"Skipping packet - wrong destination port (expected {port}, got {dst_port})")
                     continue
@@ -105,9 +98,7 @@ def listen_for_results(listen_ip, port, interface):
                 
                 print("--- Received Telemetry Results ---")
                 print(f"Payload length: {len(payload_bytes)} bytes")
-                # print(f"Payload (raw): {payload_bytes}")
                 
-                # Decode JSON payload
                 payload_str = payload_bytes.decode('utf-8')
                 # print(f"Payload (decoded): {payload_str}")
                 
@@ -120,7 +111,6 @@ def listen_for_results(listen_ip, port, interface):
                         print(f"    {key} : {value}")
                 print("------------------------------------")
                 
-                # Exit after receiving one result
                 break
             
             except json.JSONDecodeError as je:
