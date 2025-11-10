@@ -58,9 +58,8 @@ This CSV file contains information about the IP and MAC addresses associated wit
    * $R$ is the optional bandwidth in Mbps
    * $d$ is the optional delay (in $\mu\text{s}$)
    * $\text{MAC}_A,\text{IP}_A$ are the MAC and IP addresses on $A$'s interface for the communication link 
-   * $\text{MAC}_B,\text{IP}_B$ are for $B$'s interface oof the link
-
-2. $(A,\_,\text{IP}_A,\text{MAC}_A,\text{IP}_B,\_,\_,\_)$ where $A$ is a host with IP address $\text{IP}_A$, MAC address $\text{MAC}_A$ and default gateway $\text{IP}_B$
+   * $\text{MAC}_B,\text{IP}_B$ are for $B$'s interface of the link
+2. $(A,,\text{IP}_A,\text{MAC}_A,\text{IP}_B,,,)$ where $A$ is a host with IP address $\text{IP}_A$, MAC address $\text{MAC}_A$ and default gateway $\text{IP}_B$
 
 This file is used at runtime to create the topology and run routing algorithms such as OSPF, following which, the table entries are computed for each P4 switch and it is programmed. 
 Changing this file is akin to changing the topology. In essence, this CSV file is a programming interface.
@@ -335,14 +334,14 @@ Received INT probe: 00000000003000000000001affff4017800001020000004230d700000042
 To have the INT probe visit both `s1` and `s2`, we can use :
 
 ```
-h1 python3 mininet/sender_srv6.py h1-eth0 h1,s1,s2,h3 01111
+h1 python3 mininet/sender.py h1-eth0 h1,s1,s2,h3 01111
 ```
 
 For example
 
 ```
 mininet> h3 python3 mininet/receiver.py &
-mininet> h1 python3 mininet/sender_srv6.py h1-eth0 h1,s1,s2,h3 01111
+mininet> h1 python3 mininet/sender.py h1-eth0 h1,s1,s2,h3 01111
 Packet Information
         src MAC : 00:00:00:00:00:10
         src IP : 2001:1:1::1

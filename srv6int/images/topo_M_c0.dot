@@ -1,0 +1,32 @@
+digraph {
+	h1 [label="h1
+IP:2001:1:1::1/64
+MAC:00:00:00:00:00:10
+IP_g:2001:1:1::fa" shape=rect]
+	h2 [label="h2
+IP:2001:1:2::2/64
+MAC:00:00:00:00:00:21
+IP_g:2001:1:2::fb" shape=rect]
+	h3 [label="h3 (INT server)
+IP:2001:1:3::1/64
+MAC:00:00:00:00:00:30
+IP_g:2001:1:3::fa" shape=rect]
+
+s1 [label="s1" shape=circle, style=filled fillcolor=lightblue]
+s2 [label="s2" shape=circle, style=filled fillcolor=lightblue]
+
+c0 [label="controller\n" shape=rect]
+
+c0 -> s1 [arrowhead=none style=dotted];
+c0 -> s2 [arrowhead=none style=dotted];
+
+// Normal
+s1 -> h1 [label="                        " arrowhead=none]
+s1 -> h3 [label="                        " arrowhead=none]
+s2 -> h2 [label="                        " arrowhead=none]
+s2 -> h3 [label="                        " arrowhead=none]
+s1 -> s2 [label="                        " arrowhead=none]
+
+
+{rank=same; s1,s2}
+}

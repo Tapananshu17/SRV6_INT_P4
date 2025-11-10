@@ -1,5 +1,5 @@
 digraph {
-	h1 [label="h1
+	h1 [label="h1 (sender)
 IP:2001:1:1::1/64
 MAC:00:00:00:00:00:10
 IP_g:2001:1:1::fa" shape=rect]
@@ -7,7 +7,7 @@ IP_g:2001:1:1::fa" shape=rect]
 IP:2001:1:2::2/64
 MAC:00:00:00:00:00:21
 IP_g:2001:1:2::fb" shape=rect]
-	h3 [label="h3 (INT server)
+	h3 [label="h3 (receiver)
 IP:2001:1:3::1/64
 MAC:00:00:00:00:00:30
 IP_g:2001:1:3::fa" shape=rect]
@@ -15,12 +15,12 @@ IP_g:2001:1:3::fa" shape=rect]
 s1 [label="s1" shape=circle, style=filled fillcolor=lightblue]
 s2 [label="s2" shape=circle, style=filled fillcolor=lightblue]
 
-	// Normal
-	s1 -> h1 [label="10 Mbps" arrowhead=none]
-	s1 -> h3 [label="10 Mbps" arrowhead=none]
-	s2 -> h2 [label="5 Mbps" arrowhead=none]
-	s2 -> h3 [label="5 Mbps" arrowhead=none]
-	s1 -> s2 [label="5 Mbps" arrowhead=none]
+	// // Normal
+	// s1 -> h1 [label="10 Mbps" arrowhead=none]
+	// s1 -> h3 [label="10 Mbps" arrowhead=none]
+	// s2 -> h2 [label="5 Mbps" arrowhead=none]
+	// s2 -> h3 [label="5 Mbps" arrowhead=none]
+	// s1 -> s2 [label="5 Mbps" arrowhead=none]
 
 	// h3 server loop
 	// s1 -> h1 [label="               " arrowhead=none]
@@ -36,12 +36,19 @@ s2 [label="s2" shape=circle, style=filled fillcolor=lightblue]
 	// s2 -> h3 [label="               " color=red style=bold]
 	// s1 -> s2 [label="               " color=red style=bold]
 
-	// // receiver
-	// s1 -> h1 [label="               " color=green style=bold]
-	// s1 -> h3 [label="               " arrowhead=none]
+	// // normal routing
+	// s1 -> h1 [label="               " dir=back color=red style=bold]
+	// s1 -> h3 [label="               " color=red style=bold]
 	// s2 -> h2 [label="               " arrowhead=none]
-	// s2 -> h3 [label="               " dir=back color=green style=bold]
-	// s1 -> s2 [label="               " dir = back color=green style=bold]
+	// s2 -> h3 [label="               " arrowhead=none]
+	// s1 -> s2 [label="               " arrowhead=none]
+
+	// receiver
+	s1 -> h1 [label="               " color=green style=bold]
+	s1 -> h3 [label="               " dir=back style=bold color=green]
+	s2 -> h2 [label="               " arrowhead=none]
+	s2 -> h3 [label="               " arrowhead=none]
+	s1 -> s2 [label="               " arrowhead=none]
 
 	// // flood
 	// s1 -> h1 [label="               " dir =back color=red style=bold]
