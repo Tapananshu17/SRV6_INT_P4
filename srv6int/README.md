@@ -394,7 +394,11 @@ Received INT probe: 0000000000310000000000abffff40278000010300000049836700000049
 ## Quality of real-time measurement
 
 The main incentive to use INT is that it can continuously measure in real-time with no overhead on the telemetry application and routing processor caused due to a management plane protocol such as SNMP. 
-To get a measure of how "real-time" these measurements are, we can run the `server.py` script with the `--time` option. Without the `--time` option, it starts an active INT server, similar to the SFANT system. With the option, it additionally times this process at various 2 stages: the probe end-to-end delay, and the processing time (for parsing the probe). The time for crafting the probe is not included since that is done only once when a telemetry request arrives; after that the same packet is re-sent periodically.
+To get a measure of how "real-time" these measurements are, we can run the `server.py` script with the `--time` option. 
+
+![h3 server](images/topo_M_server.png){height=100px}
+
+Without the `--time` option, it starts an active INT server, similar to the SFANT system. With the option, it additionally times this process at 2 stages: the probe end-to-end delay, and the processing time (for parsing the probe). The time for crafting the probe is not included since that is done only once when a telemetry request arrives; after that the same packet is re-sent periodically.
 We can run the script like this : 
 
 ```
@@ -415,12 +419,15 @@ Compared to this, the interval at which telemetry data is polled in a traditiona
 ## Overhead due to INT
 
 Since packets containing INT headers are processed for longer in the switches, they cause queuing delay for other packets. We want to know how severe this may be. To do that, I have created scripts `flood_sender.py` and `flood_receiver.py` that send and receive 5 MB of data (including headers) over UDP. 
+
+![overhead measurement](images/topo_M_flood.png){height=100px}
+
 The `flood_sender.py` script takes in the interface, source host, destination host, average rate $r$ in Mbps, packet size $L$ in bytes, burst length $n$, and total amount of data to send in MB. For the given topology, an appropriate pair of source host and destination host is "h1" and "h2" and an appropriate amount of data to send is 5 MB.
 For example, `h1 python3 mininet/flood_sender.py h1-eth0 "h1" "h2" 4 500 5 5`. It also writes the time at which it started sending data to `tmp/flood_start.txt` and the time when it finished as well as bytes sent to `tmp/flood_end.txt` . 
 The `flood_receiver.py` script on the other hand periodically writes the number of packets to `tmp/receiver_status.txt` .
 Using all of this data, `analysis.py` creates plots like these :
 
-![Number of received bytes with no INT](images/Flood_1_500_1.png)
+![Number of received bytes with no INT](images/Flood_1_500_1.png){height=200px}
 
 This one was created using $r=1,\, L =500,\, n = 1$ .
 
@@ -438,6 +445,8 @@ Here are some more with varying values of $r$, keeping other parameters constant
 </table>
 
 For the second case, the probes are being sent from `h3` which using the `server.py` script with `--time` option. These probes are sent at an interval of 100 ms.
+
+![flood and INT probes](images/topo_M_flood_INT.png){height=100px}
 
 As you can see from the images, with an increase in $r$, the packets lost  (the gap between the orange horizontal line and the last reading for packets received) increases.
 Moreover, the case where INT probes are also being sent is almost identical.
