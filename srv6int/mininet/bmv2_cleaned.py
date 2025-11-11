@@ -21,17 +21,11 @@ BMV2_LOG_LINES = 5
 BMV2_DEFAULT_DEVICE_ID = 1 
 DEFAULT_PIPECONF = "org.onosproject.pipelines.basic" 
 
-
-
-# Stratum-related constants and helpers removed (BMv2-only)
-
-
 def parseBoolean(value):
     if value in ['1', 1, 'true', 'True']:
         return True
     else:
         return False
-
 
 def pickUnusedPort():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -40,18 +34,18 @@ def pickUnusedPort():
     s.close()
     return port
 
-
 def writeToFile(path, value):
     f = open(path, "w")
     f.write(str(value))
     f.close()
 
-
 def watchDog(sw):
     """
-    Ensures that the BMv2 switch stays alive.
-    This is done using a keep-alive file; 
-    which on removal, signals the watchdog to kill the switch
+    Monitor a BMv2 switch and keep it running.
+    Uses a keep-alive file — when the file is removed or a global exception flag is set,
+    the watchdog will terminate the switch process. It also probes the switch's gRPC
+    port periodically and will attempt to restart the switch if the process becomes
+    unreachable.
     """
     try:
         writeToFile(sw.keepaliveFile,
@@ -76,8 +70,6 @@ def watchDog(sw):
     except Exception as e:
         warn("*** ERROR: " + str(e))
         sw.killBmv2(log=True)
-
-
 class ONOSHost(Host):
     def __init__(self, name, inNamespace=True, **params):
         Host.__init__(self, name, inNamespace=inNamespace, **params)
@@ -94,13 +86,9 @@ class ONOSHost(Host):
         self.cmd("sysctl -w net.ipv6.conf.lo.disable_ipv6=1")
         return r
 
-
 class ONOSBmv2Switch(Switch):
-    """BMv2 software switch with gRPC server"""
-    
-    
-    
-    
+    """BMv2 software switch implementation that exposes a gRPC server."""
+
     mininet_exception = multiprocessing.Value('i', 0)
 
     def __init__(self, name, json=None, debugger=False, loglevel="off",
@@ -122,8 +110,6 @@ class ONOSBmv2Switch(Switch):
         self.notifications = parseBoolean(notifications)
         self.loglevel = loglevel
         
-        
-        
         self.logfile = 'tmp/bmv2-%s-log' % self.name
         self.elogger = parseBoolean(elogger)
         self.pktdump = parseBoolean(pktdump)
@@ -136,43 +122,39 @@ class ONOSBmv2Switch(Switch):
         self.withGnmi = parseBoolean(gnmi)
         self.longitude = kwargs['longitude'] if 'longitude' in kwargs else None
         self.latitude = kwargs['latitude'] if 'latitude' in kwargs else None
+
         if onosdevid is not None and len(onosdevid) > 0:
             self.onosDeviceId = onosdevid
         else:
             self.onosDeviceId = "device:bmv2:%s" % self.name
+
         self.p4DeviceId = BMV2_DEFAULT_DEVICE_ID
         self.logfd = None
         self.bmv2popen = None
-        self.stopped = True
-        
+        self.stopped = True        
         self.keepaliveFile = 'tmp/bmv2-%s-watchdog.out' % self.name
         self.targetName = SIMPLE_SWITCH_GRPC
         self.controllers = None
-
-        
         self.cleanupTmpFiles()
 
     def getSourceIp(self, dstIP):
         """
-        Queries the Linux routing table (`ip route`) to get the IP address (and hence the interface) that can talk with
-        dstIP (the controller's IP address, passed in by static method `getControllerIP` for the MiniNet `Switch` class).
-        Note that sometimes, due to AS policies, only srcIP addresses in the same subnet as the dstIP can talk with dstIP.
-        Also note that the same interface may have multiple IP addresses, which may all be from different IP address blocks.
-        This function returns any one of the src IP addresses that are in the same subnet.
+        Determine a local source IP address that would be used to reach the given destination IP by
+        parsing the output of `ip route get <dstIP>`. Returns a suitable source IP string or None
+        when it cannot be determined.
         """
-        
+
         ipRouteOut = self.cmd('ip route get %s' % dstIP) 
-        
-        
+
         r = re.search(r"src (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", ipRouteOut) 
         
         return r.group(1) if r else None 
 
     def getDeviceConfig(self, srcIP):
         """
-        Returns a JSON string that describes the driver, port id for grpc, etc. for this switch.
-        This JSON string will be passed to the ONOS controller using it Netcfg REST API later (`doOnosNetcfg`).
-        Thus, we get automatic router discovery.
+        Build and return a dictionary describing this switch for ONOS netcfg. It includes the management
+        address (gRPC), driver, pipeconf and optional geographic coordinates. If port injection is enabled,
+        also include BMv2-specific port metadata so ONOS can discover and configure ports.
         """
         basicCfg = {
             "managementAddress": "grpc://%s:%d?device_id=%d" % (
@@ -211,8 +193,9 @@ class ONOSBmv2Switch(Switch):
 
     def doOnosNetcfg(self, controllerIP):
         """
-        Notifies ONOS about the new device via Netcfg.
-        The controllerIP is given to the function by MiniNet
+        Prepare the Netcfg payload for ONOS using the local source IP and write it to disk. If netcfg
+        pushing is enabled, attempt to POST the JSON to the ONOS REST API using HTTP Basic auth; otherwise
+        leave the file for manual inspection.
         """
         srcIP = self.getSourceIp(controllerIP)
         if not srcIP:
@@ -225,18 +208,13 @@ class ONOSBmv2Switch(Switch):
             }
         }
 
-        
         with open(self.netcfgfile, 'w') as fp:
             json.dump(cfgData, fp, indent=4) 
 
         if not self.netcfg:
-            
             print("")
             return
 
-        
-
-        
         url = 'http://%s:8181/onos/v1/network/configuration/' % controllerIP
         
         pm = urllib3.HTTPPasswordMgrWithDefaultRealm()
@@ -275,24 +253,24 @@ class ONOSBmv2Switch(Switch):
 
     def start(self, controllers=None):
         """
-        Main loop. 
-        This is what MiniNet will run while doing `net.start()` 
+        Start and supervise the BMv2 switch process.
+        This routine is invoked by MiniNet during `net.start()` and performs preparation of ports/files,
+        launches the BMv2 process (unless dry-run), waits for the gRPC server to become available,
+        starts a watchdog thread, and notifies ONOS via netcfg.
         """
         if not self.stopped:
             warn("*** %s is already running!\n" % self.name)
             return
 
         if controllers is not None:
-            
-            
             self.controllers = controllers
 
-        
         self.cleanupTmpFiles()
 
         if self.grpcPort is None:
             self.grpcPort = pickUnusedPort()
         writeToFile("tmp/bmv2-%s-grpc-port" % self.name, self.grpcPort)
+
         if self.thriftPort is None:
             self.thriftPort = pickUnusedPort()
         writeToFile("tmp/bmv2-%s-thrift-port" % self.name, self.thriftPort)
@@ -363,8 +341,7 @@ class ONOSBmv2Switch(Switch):
         args.append('--grpc-server-addr 0.0.0.0:%s' % self.grpcPort)
         return args
 
-    def waitBmv2Start(self):
-        
+    def waitBmv2Start(self):  
         
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         endtime = time.time() + SWITCH_START_TIMEOUT
@@ -424,7 +401,11 @@ class ONOSBmv2Switch(Switch):
         self.cmd("rm -rf /tmp/bmv2-%s-*" % self.name)
 
     def stop(self, deleteIntfs=True):
-        """Terminate switch."""
+        """Shut down the BMv2 process and perform switch cleanup.
+
+        Stops the BMv2 process and then calls the parent Switch.stop to remove interfaces
+        (if deleteIntfs is True).
+        """
         self.killBmv2(log=True)
         Switch.stop(self, deleteIntfs)
 
@@ -432,8 +413,6 @@ class ONOSBmv2Switch(Switch):
 class ONOSStratumSwitch(ONOSBmv2Switch):
     def __init__(self, name, **kwargs):
         raise NotImplementedError("Stratum support has been removed in this cleaned version.")
-
-
 
 switches = {
     'onosbmv2': ONOSBmv2Switch,
