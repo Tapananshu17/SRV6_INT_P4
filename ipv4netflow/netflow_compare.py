@@ -33,27 +33,27 @@ def build_topology():
                 intfName1='h1-eth0', intfName2='r1-eth0',
                 params1={'ip': '10.0.1.100/24'},
                 params2={'ip': '10.0.1.1/24'},
-                bw=100)
+                bw=10)
     net.addLink(h1, r2,
                 intfName1='h1-eth1', intfName2='r2-eth0',
                 params1={'ip': '10.0.2.100/24'},
                 params2={'ip': '10.0.2.1/24'},
-                bw=100)
+                bw=10)
     net.addLink(r1, r2,
                 intfName1='r1-eth1', intfName2='r2-eth1',
                 params1={'ip': '10.0.3.1/24'},
                 params2={'ip': '10.0.3.2/24'},
-                bw=100)
+                bw=5)
     net.addLink(h2, r1,
                 intfName1='h2-eth0', intfName2='r1-eth2',
                 params1={'ip': '10.0.4.100/24'},
                 params2={'ip': '10.0.4.1/24'},
-                bw=100)
+                bw=5)
     net.addLink(collector, r2,
                 intfName1='collector-eth0', intfName2='r2-eth2',
                 params1={'ip': '10.0.5.100/24'},
                 params2={'ip': '10.0.5.1/24'},
-                bw=100)
+                bw=5)
 
     return net
 
@@ -126,7 +126,7 @@ def run_experiment(net, num_runs=5):
     for i in range(num_runs):
         info(f'  Run {i+1}/{num_runs}...')
         # Run iperf3 client and capture output
-        output = h1.cmd('iperf3 -c 10.0.4.100 -n 100M')
+        output = h1.cmd('iperf3 -c 10.0.4.100 -n 5M')
         
         run_time = parse_iperf_time(output)
         if run_time:
@@ -183,7 +183,7 @@ if __name__ == "__main__":
         overhead_abs = avg_time_with_netflow - avg_time_no_netflow
         overhead_pct = (overhead_abs / avg_time_no_netflow) * 100
         
-        info(f'  Test parameters: {num_runs} runs of 100M transfer\n')
+        info(f'  Test parameters: {num_runs} runs of 5M transfer\n')
         info(f'  Average time without NetFlow: {avg_time_no_netflow:.4f}s\n')
         info(f'  Average time WITH NetFlow:    {avg_time_with_netflow:.4f}s\n')
         info('--------------------------------------------------\n')
